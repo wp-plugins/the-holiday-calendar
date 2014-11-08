@@ -28,7 +28,20 @@ No private data will ever be sent to this webservice beside some minor diagnosti
 
 = Which countries are currently supported? =
 
-For now we only provide the US holidays. However in the near future we plan to support other countries also.
+For now we only provide holidays for:
+
+Brazil,
+France,
+Germany,
+India,
+Japan,
+Mexico,
+Russia,
+South Korea,
+United Kingdom,
+United States
+
+In the near future we plan to support other countries also.
 
 == Screenshots ==
 
@@ -38,3 +51,7 @@ For now we only provide the US holidays. However in the near future we plan to s
 
 = 1.0 =
 * First release
+
+= 1.1 =
+* Added support for 9 more countries
+* Fixed width issue holiday names

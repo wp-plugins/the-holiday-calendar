@@ -23,11 +23,27 @@ class the_holiday_calendar extends WP_Widget {
 		} else {
 			 $title = '';
 		}
+		
+		$countries = array('United States' => 'US', 'India' => 'IN', 'Japan' => 'JP', 'Brazil' => 'BR', 'Russia' => 'RU', 'Germany' => 'DE', 'United Kingdom' => 'GB', 'France' => 'FR', 'Mexico' => 'MX', 'South Korea' => 'KR');
+		$selectedCountry = $instance['country2'];
+		$selectedCountry = isset($selectedCountry) ? $selectedCountry : 'US';
+		
+		ksort($countries);
 		?>
 
 		<p>
 		<label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Widget Title', 'wp_widget_plugin'); ?></label>
 		<input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo $title; ?>" />
+		</p>
+		<p>
+		<label for="<?php echo $this->get_field_id('country2'); ?>">Country</label>
+		<select class="widefat" id="<?php echo $this->get_field_id('country2'); ?>" name="<?php echo $this->get_field_name('country2'); ?>" >
+        <?php foreach($countries as $country => $iso) { ?>
+          <option <?php selected( $selectedCountry, $iso ); ?> value="<?php echo $iso; ?>"><?php echo $country; ?></option>
+        <?php } ?>
+		</select>
+		</p>
+		<p>
 		<input class="checkbox" type="checkbox" <?php checked($instance['show_powered_by'], 'off'); ?> id="<?php echo $this->get_field_id('show_powered_by'); ?>" name="<?php echo $this->get_field_name('show_powered_by'); ?>" /> 
 		<label for="<?php echo $this->get_field_id('show_powered_by'); ?>">Enable powered by link. Thank you!!!</label>
 		</p>
@@ -39,7 +55,8 @@ class the_holiday_calendar extends WP_Widget {
 		  $instance = $old_instance;
 		  // Fields
 		  $instance['title'] = strip_tags($new_instance['title']);
-		  $instance['show_powered_by'] = strip_tags($new_instance['show_powered_by']);
+		  $instance['show_powered_by'] = $new_instance['show_powered_by'];
+		  $instance['country2'] = $new_instance['country2'];
 		  
 		  if(!array_key_exists('unique_id', $instance))
 		  {
@@ -78,10 +95,11 @@ class the_holiday_calendar extends WP_Widget {
 		
 		var unique_id = '<?php echo $instance['unique_id']; ?>';
 		var site_url = '<?php echo  site_url(); ?>';
+		var countryIso = '<?php echo $instance['country2']; ?>';
 	
 	   var $j = jQuery.noConflict();
 	   $j.ajax({
-		   url: 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=1.0&amountOfHolidays=3&fromDate=' + curr_year + '-' + curr_month + '-' + curr_date + '&pluginId=' + unique_id + '&url=' + site_url,
+		   url: 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=1.0&amountOfHolidays=3&fromDate=' + curr_year + '-' + curr_month + '-' + curr_date + '&pluginId=' + unique_id + '&url=' + site_url + '&countryIso=' + countryIso,
 		   success: function(data){
 				output = '';
 				rows = data.split('\r\n');
@@ -89,7 +107,7 @@ class the_holiday_calendar extends WP_Widget {
 					splitted = entry.split('=');
 					if(splitted.length > 1)
 					{
-						output += '<div class="date" style="float: left;  margin-right: 10px;">' + splitted[0] + '</div><div class="name" style="width: 125px; float: left;">' + splitted[1] + '</div><div class="thc-spacer" style="float: left; height: 10px; width: 100%;">&nbsp;</div><br \>';
+						output += '<div class="date" style="float: left;  margin-right: 10px;">' + splitted[0] + '</div><div class="name" style="float: left;">' + splitted[1] + '</div><div class="thc-spacer" style="float: left; height: 10px; width: 100%;">&nbsp;</div><br \>';
 					}
 				});
 				
