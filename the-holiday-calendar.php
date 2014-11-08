@@ -99,7 +99,7 @@ class the_holiday_calendar extends WP_Widget {
 	
 	   var $j = jQuery.noConflict();
 	   $j.ajax({
-		   url: 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=1.0&amountOfHolidays=3&fromDate=' + curr_year + '-' + curr_month + '-' + curr_date + '&pluginId=' + unique_id + '&url=' + site_url + '&countryIso=' + countryIso,
+		   url: 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=1.1&amountOfHolidays=3&fromDate=' + curr_year + '-' + curr_month + '-' + curr_date + '&pluginId=' + unique_id + '&url=' + site_url + '&countryIso=' + countryIso,
 		   success: function(data){
 				output = '';
 				rows = data.split('\r\n');
