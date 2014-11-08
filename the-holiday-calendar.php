@@ -103,13 +103,18 @@ class the_holiday_calendar extends WP_Widget {
 		   success: function(data){
 				output = '';
 				rows = data.split('\r\n');
+				output += '<div class="thc-holidays" style="display:table; border-collapse: collapse;">';
 				rows.forEach(function(entry) {								
 					splitted = entry.split('=');
 					if(splitted.length > 1)
 					{
-						output += '<div class="date" style="float: left;  margin-right: 10px;">' + splitted[0] + '</div><div class="name" style="float: left;">' + splitted[1] + '</div><div class="thc-spacer" style="float: left; height: 10px; width: 100%;">&nbsp;</div><br \>';
+						output += '<div class="thc-holiday" style="display: table-row;">';
+						output += '<div class="date" style="display: table-cell; padding-right: 10px;">' + splitted[0] + '</div><div class="name" style="display: table-cell; padding-bottom: 10px;">' + splitted[1] + '</div>';
+						output += '</div>';
 					}
 				});
+				
+				output += '</div>';
 				
 				document.getElementById('thc-widget-content').innerHTML = output;
 			},
