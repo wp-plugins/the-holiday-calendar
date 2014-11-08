@@ -49,9 +49,10 @@ In the near future we plan to support other countries also.
 
 == Changelog ==
 
-= 1.0 =
-* First release
-
 = 1.1 =
 * Added support for 9 more countries
 * Fixed width issue holiday names
+
+= 1.0 =
+* First release
+
