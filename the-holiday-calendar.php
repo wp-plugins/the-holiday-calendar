@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: The Holiday Calendar
-Version: 1.2
+Version: 1.3
 Plugin URI: http://www.theholidaycalendar.com
 Description: Shows upcoming holidays.
 Author: Mva7
@@ -10,11 +10,130 @@ Author URI: http://www.mva7.nl
 
 class the_holiday_calendar extends WP_Widget {
 
+	const POSTTYPE            = 'thc-events';
+
 	// constructor
 	function the_holiday_calendar() {
 		parent::WP_Widget(false, $name = __('The Holiday Calendar', 'wp_widget_plugin') );
+		
+		add_action( 'init', array( $this, 'create_post_type' ) );
+		add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
+		add_action( 'save_post', array( $this, 'save' ) );
 	}
+	
+	/**
+	 * Adds the meta box container.
+	 */
+	public function add_meta_box( $post_type ) {
+            
+		add_meta_box(
+			'some_meta_box_name'
+			,__( 'The Holiday Calendar', 'myplugin_textdomain' )
+			,array( $this, 'render_meta_box_content' )
+			,self::POSTTYPE
+			,'normal'
+			,'high'
+		);   
+	}
+	
+	public function render_meta_box_content( $post ) {
+		// Add an nonce field so we can check for it later.
+		wp_nonce_field( 'thc_event_detail_box', 'thc_event_detail_box_nonce' );
 
+		// Enqueue Datepicker + jQuery UI CSS
+		wp_enqueue_script( 'jquery-ui-datepicker' );
+		wp_enqueue_style( 'jquery-ui-style', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.1/themes/smoothness/jquery-ui.css', true);		
+		
+		// Retrieve current date for cookie
+		$eventDate = get_post_meta( $post->ID, 'eventDate', true  );
+		
+		$splitted = explode( '-' , $eventDate );
+		
+		$year = $splitted[0];
+		$month = $splitted[1];
+		$day = $splitted[2];
+		
+		$eventDate = $month . '/' . $day . '/' . $year;
+		
+		?>
+			<script>
+				jQuery(document).ready(function(){
+					jQuery('#EventDate').datepicker({
+					dateFormat : 'm/d/yy'
+					});
+				});
+			</script>
+
+			<table>
+				<tr>
+				<td>Event date:</td>
+				<td>
+					<input type="text" name="EventDate" id="EventDate" value="<?php echo $eventDate; ?>" /></td>
+				</tr>
+			</table>
+			<p>Remark: the post description will be used in the next version of this plugin. (coming soon!)</p>
+		<?php
+	}
+	
+	/**
+	 * Save the meta when the post is saved.
+	 *
+	 * @param int $post_id The ID of the post being saved.
+	 */
+	public function save( $post_id ) {		
+		/*
+		 * We need to verify this came from the our screen and with proper authorization,
+		 * because save_post can be triggered at other times.
+		 */
+
+		// Check if our nonce is set.
+		if ( ! isset( $_POST['thc_event_detail_box_nonce'] ) )
+			return $post_id;
+
+		$nonce = $_POST['thc_event_detail_box_nonce'];
+
+		// Verify that the nonce is valid.
+		if ( ! wp_verify_nonce( $nonce, 'thc_event_detail_box' ) )
+			return $post_id;
+
+		// If this is an autosave, our form has not been submitted,
+                //     so we don't want to do anything.
+		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) 
+			return $post_id;
+
+		// Check the user's permissions.
+		if ( ! current_user_can( 'edit_post', $post_id ) )
+			return $post_id;		
+
+		/* OK, its safe for us to save the data now. */
+		
+		// Sanitize the user input.
+		$mydata = sanitize_text_field( $_POST['EventDate'] );
+		
+		$splitted = explode( '/' , $mydata );
+		
+		$year = $splitted[2];
+		$month = $splitted[0];
+		$day = $splitted[1];
+
+		// Update the meta field.
+		update_post_meta( $post_id, 'eventDate', $year . '-' . str_pad($month, 2, "0", STR_PAD_LEFT) . '-' . str_pad($day, 2, "0", STR_PAD_LEFT) );		
+	}
+	
+	function create_post_type() {
+	  register_post_type( self::POSTTYPE,
+		array(
+		  'labels' => array(
+			'name' => __( 'Events' ),
+			'singular_name' => __( 'Event' )
+		  ),
+		  'public' => true,
+		  'has_archive' => true,
+		  'menu_position' => 5,
+		  'menu_icon' => 'dashicons-calendar-alt'
+		)
+	  );
+	}
 	// widget form creation
 	function form($instance) {
 		// Check values
@@ -88,6 +207,43 @@ class the_holiday_calendar extends WP_Widget {
 		  
 		 return $instance;
 	}
+	
+	function formatDate($dateToFormat, $format)
+	{
+		$dateToFormat = date_create_from_format('Y-m-d', $dateToFormat);
+		/*
+			0: dd-mm-yy
+			1: dd.mm.yy
+			2: dd.mm.yyyy
+			3: dd/mm/yy
+			4: dd/mm/yyyy
+			5: mm/dd/yyyy (US)
+			6: yy/mm/dd
+			7: yyyy년 m월 d일
+		*/
+
+		switch ($format)
+		{
+			case 0:
+				return date_format($dateToFormat,"d-m-y");//dateToFormat.ToString("dd-MM-yy", CultureInfo.InvariantCulture);
+			case 1:
+				return date_format($dateToFormat,"d.m.y");//return dateToFormat.ToString("dd.MM.yy", CultureInfo.InvariantCulture);
+			case 2:
+				return date_format($dateToFormat,"d.m.Y");//return dateToFormat.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture);
+			case 3:
+				return date_format($dateToFormat,"d/m/y");//return dateToFormat.ToString("dd/MM/yy", CultureInfo.InvariantCulture);
+			case 4:
+				return date_format($dateToFormat,"d/m/Y");//return dateToFormat.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
+			case 5:
+				return date_format($dateToFormat,"m/d/Y");//return DateHelper.FormatUSDateShort(dateToFormat);
+			case 6:
+				return date_format($dateToFormat,"y/m/d");//return dateToFormat.ToString("yy/MM/dd", CultureInfo.InvariantCulture);
+			case 7:
+				return date_format($dateToFormat,"Y년 m월 d일");//return dateToFormat.ToString("yyyy년 M월 d일", CultureInfo.InvariantCulture);
+		}
+
+		throw new InvalidOperationException("Date format not supported");
+	}
 
 	// display widget
 	function widget($args, $instance) {
@@ -118,31 +274,85 @@ class the_holiday_calendar extends WP_Widget {
 		var unique_id = '<?php echo $instance['unique_id']; ?>';
 		var site_url = '<?php echo  site_url(); ?>';
 		var countryIso = '<?php echo isset($instance['country2']) ? $instance['country2'] : 'US'; ?>';
-		var dateFormat = '<?php echo isset($instance['dateFormat']) ? $instance['dateFormat'] : '5'; ?>';
-	
-	   var $j = jQuery.noConflict();
-	   $j.ajax({
-		   url: 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=1.2&amountOfHolidays=3&fromDate=' + curr_year + '-' + curr_month + '-' + curr_date + '&pluginId=' + unique_id + '&url=' + site_url + '&countryIso=' + countryIso + '&dateFormat=' + dateFormat,
-		   success: function(data){
-				output = '';
-				rows = data.split('\r\n');
-				output += '<div class="thc-holidays" style="display:table; border-collapse: collapse;">';				
-				rows.forEach(function(entry) {								
-					splitted = entry.split('=');
-					if(splitted.length > 1)
-					{
-						output += '<div class="thc-holiday" style="display: table-row;">';
-						output += '<div class="date" style="display: table-cell; padding-right: 10px;">' + splitted[0] + '</div><div class="name" style="display: table-cell; padding-bottom: 10px;">' + splitted[1] + '</div>';						
-						output += '</div>';
-					}
-				});
+		var dateFormat = '<?php $dateFormat = isset($instance['dateFormat']) ? $instance['dateFormat'] : '5'; echo $dateFormat; ?>';
+		var events = [<?php
+			$args = array(
+				'post_type'  => self::POSTTYPE,
+				'meta_query' => array(
+					array(
+						'key'     => 'eventDate',
+						'value'   => date('Y') . '-' . date('m') . '-' . date('d'),
+						'compare' => '>=',
+					),
+				),
+				'orderby' => 'eventDate',
+				'order' => 'ASC',
+				'posts_per_page' => 3
+			);
+			$query = new WP_Query( $args );	
+			
+			// The Loop
+			if ( $query->have_posts() ) {
 				
+				while ( $query->have_posts() ) {
+					$query->the_post();
+					$metaData = get_post_meta( $query->post->ID, 'eventDate', true );
+					echo '[\'' . $this->formatDate($metaData, $dateFormat) . '\',\'' . get_the_title() . '\',\'' . $metaData . '\']';
+				}
+			} else {
+				echo '/* no posts found */';
+			}
+			/* Restore original Post Data */
+			wp_reset_postdata();
+		?>];
+		
+		function ajax1() {
+			// NOTE:  This function must return the value 
+			//        from calling the $.ajax() method.
+			return jQuery.noConflict().ajax({
+			   url: 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=1.2&amountOfHolidays=3&fromDate=' + curr_year + '-' + curr_month + '-' + curr_date + '&pluginId=' + unique_id + '&url=' + site_url + '&countryIso=' + countryIso + '&dateFormat=' + dateFormat,
+			   success: function(data){	
+					rows = data.split('\r\n');
+					
+					rows.forEach(function(entry) {								
+						splitted = entry.split('=');
+						if(splitted.length > 1)
+						{
+							var valueToPush = [splitted[0], splitted[1], splitted[2]]; // or "var valueToPush = new Object();" which is the same
+							
+							this.events.push(valueToPush);
+						}
+					});
+				},
+			   timeout: 3000 //in milliseconds
+			});
+		}
+		
+		function compare(a,b) {
+		  if (a[2] < b[2])
+			 return -1;
+		  if (a[2] > b[2])
+			return 1;
+		  return 1;
+		}
+		
+		jQuery.noConflict().when(ajax1()).done(function(a1){
+			events.sort(compare)
+			
+			var output = '<div class="thc-holidays" style="display:table; border-collapse: collapse;">';
+			
+			events = events.slice(0, 3);
+			
+			events.forEach(function(event) {
+				output += '<div class="thc-holiday" style="display: table-row;">';
+				output += '<div class="date" style="display: table-cell; padding-right: 10px;">' + event[0] + '</div><div class="name" style="display: table-cell; padding-bottom: 10px;">' + event[1] + '</div>';						
 				output += '</div>';
-				
-				document.getElementById('thc-widget-content').innerHTML = output;
-			},
-		   timeout: 3000 //in milliseconds
+			});
+			
+			output += '</div>';
+			document.getElementById('thc-widget-content').innerHTML = output;
 		});
+		
 		</script>
 	   <?php
 	   echo '</div>';
