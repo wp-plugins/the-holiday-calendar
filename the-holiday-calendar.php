@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: The Holiday Calendar
-Version: 1.3
+Version: 1.2
 Plugin URI: http://www.theholidaycalendar.com
 Description: Shows upcoming holidays.
 Author: Mva7
@@ -162,8 +162,15 @@ class the_holiday_calendar extends WP_Widget {
 		$selectedDateFormat = isset($selectedDateFormat) ? $selectedDateFormat : '5'; //is US (default)
 		
 		ksort($countries);
+		
+		$showPoweredBy = isset($instance['show_powered_by']) ? $instance['show_powered_by'] : '0';
+		$includeThcEvents = isset($instance['includeThcEvents2']) ? $instance['includeThcEvents2'] : '0';
 		?>
 
+		<p>
+			<input class="checkbox" type="checkbox" <?php checked($includeThcEvents, '1'); ?> id="<?php echo $this->get_field_id('includeThcEvents2'); ?>" name="<?php echo $this->get_field_name('includeThcEvents2'); ?>" value="1" /> 
+			<label for="<?php echo $this->get_field_id('includeThcEvents2'); ?>">Include holidays (with settings below)</label>
+		</p>
 		<p>
 			<label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Widget Title', 'wp_widget_plugin'); ?></label>
 			<input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo $title; ?>" />
@@ -185,8 +192,8 @@ class the_holiday_calendar extends WP_Widget {
 			</select>
 		</p>
 		<p>
-			<input class="checkbox" type="checkbox" <?php checked($instance['show_powered_by'], 'off'); ?> id="<?php echo $this->get_field_id('show_powered_by'); ?>" name="<?php echo $this->get_field_name('show_powered_by'); ?>" /> 
-			<label for="<?php echo $this->get_field_id('show_powered_by'); ?>">Enable powered by link. Thank you!!!</label>
+			<input class="checkbox" type="checkbox" <?php checked($showPoweredBy, '1'); ?> id="<?php echo $this->get_field_id('show_powered_by'); ?>" name="<?php echo $this->get_field_name('show_powered_by'); ?>" value="1" /> 
+			<label for="<?php echo $this->get_field_id('show_powered_by'); ?>">Enable "Powered by The Holiday Calendar". Thank you!!!</label>
 		</p>
 		<?php
 	}
@@ -199,6 +206,7 @@ class the_holiday_calendar extends WP_Widget {
 		  $instance['show_powered_by'] = $new_instance['show_powered_by'];
 		  $instance['country2'] = $new_instance['country2'];
 		  $instance['dateFormat'] = $new_instance['dateFormat'];
+		  $instance['includeThcEvents2'] = $new_instance['includeThcEvents2'];
 		  
 		  if(!array_key_exists('unique_id', $instance))
 		  {
@@ -260,22 +268,15 @@ class the_holiday_calendar extends WP_Widget {
 		  echo $before_title . $title . $after_title;
 	   }
 	   
-	   echo '<div id="thc-widget-content">loading..</div><br />';
-	   if('on' == $instance['show_powered_by'] ) {
-			echo '<div class="thc-widget-footer" style="clear: left;"><div class="thc-powered-by" style="clear: left; float: left;">Powered by&nbsp;</div><a style="float: left;" href="http://www.theholidaycalendar.com/" title="The Holiday Calendar - All holidays in one overview" target="_blank">The Holiday Calendar</a></div>';
+	   echo '<div id="thc-widget-content">loading..</div>';
+	   if('1' == $instance['show_powered_by'] ) {
+			echo '<br /><div class="thc-widget-footer" style="clear: left;"><span class="thc-powered-by" style="clear: left;">Powered by&nbsp;</span><a href="http://www.theholidaycalendar.com/" title="The Holiday Calendar - All holidays in one overview" target="_blank">The Holiday Calendar</a></div>';
 	   }
+	   
+	   $dateFormat = isset($instance['dateFormat']) ? $instance['dateFormat'] : '5';
 	   ?>
 	   <script>
-	    var d = new Date();
-		var curr_date = d.getDate();
-		var curr_month = d.getMonth() + 1; //Months are zero based
-		var curr_year = d.getFullYear();
-		
-		var unique_id = '<?php echo $instance['unique_id']; ?>';
-		var site_url = '<?php echo  site_url(); ?>';
-		var countryIso = '<?php echo isset($instance['country2']) ? $instance['country2'] : 'US'; ?>';
-		var dateFormat = '<?php $dateFormat = isset($instance['dateFormat']) ? $instance['dateFormat'] : '5'; echo $dateFormat; ?>';
-		var events = [<?php
+	    var events = [<?php
 			$args = array(
 				'post_type'  => self::POSTTYPE,
 				'meta_query' => array(
@@ -306,38 +307,16 @@ class the_holiday_calendar extends WP_Widget {
 			wp_reset_postdata();
 		?>];
 		
-		function ajax1() {
-			// NOTE:  This function must return the value 
-			//        from calling the $.ajax() method.
-			return jQuery.noConflict().ajax({
-			   url: 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=1.2&amountOfHolidays=3&fromDate=' + curr_year + '-' + curr_month + '-' + curr_date + '&pluginId=' + unique_id + '&url=' + site_url + '&countryIso=' + countryIso + '&dateFormat=' + dateFormat,
-			   success: function(data){	
-					rows = data.split('\r\n');
-					
-					rows.forEach(function(entry) {								
-						splitted = entry.split('=');
-						if(splitted.length > 1)
-						{
-							var valueToPush = [splitted[0], splitted[1], splitted[2]]; // or "var valueToPush = new Object();" which is the same
-							
-							this.events.push(valueToPush);
-						}
-					});
-				},
-			   timeout: 3000 //in milliseconds
-			});
-		}
-		
 		function compare(a,b) {
-		  if (a[2] < b[2])
-			 return -1;
-		  if (a[2] > b[2])
-			return 1;
-		  return 1;
-		}
-		
-		jQuery.noConflict().when(ajax1()).done(function(a1){
-			events.sort(compare)
+			  if (a[2] < b[2])
+				 return -1;
+			  if (a[2] > b[2])
+				return 1;
+			  return 1;
+			}
+			
+		function renderContent(a1){
+			events.sort(compare);
 			
 			var output = '<div class="thc-holidays" style="display:table; border-collapse: collapse;">';
 			
@@ -351,10 +330,54 @@ class the_holiday_calendar extends WP_Widget {
 			
 			output += '</div>';
 			document.getElementById('thc-widget-content').innerHTML = output;
-		});
-		
-		</script>
+		}
+			
+		<?php
+			if(isset($instance['includeThcEvents2']) && $instance['includeThcEvents2'] == '1')
+			{
+		?>
+			var d = new Date();
+			var curr_date = d.getDate();
+			var curr_month = d.getMonth() + 1; //Months are zero based
+			var curr_year = d.getFullYear();
+			
+			var unique_id = '<?php echo $instance['unique_id']; ?>';
+			var site_url = '<?php echo  site_url(); ?>';
+			var countryIso = '<?php echo isset($instance['country2']) ? $instance['country2'] : 'US'; ?>';
+			var dateFormat = '<?php echo $dateFormat; ?>';
+					
+			function ajax1() {
+				// NOTE:  This function must return the value 
+				//        from calling the $.ajax() method.
+				return jQuery.noConflict().ajax({
+				   url: 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=1.2&amountOfHolidays=3&fromDate=' + curr_year + '-' + curr_month + '-' + curr_date + '&pluginId=' + unique_id + '&url=' + site_url + '&countryIso=' + countryIso + '&dateFormat=' + dateFormat,
+				   success: function(data){	
+						rows = data.split('\r\n');
+						
+						rows.forEach(function(entry) {								
+							splitted = entry.split('=');
+							if(splitted.length > 1)
+							{
+								var valueToPush = [splitted[0], splitted[1], splitted[2]]; // or "var valueToPush = new Object();" which is the same
+								
+								this.events.push(valueToPush);
+							}
+						});
+					},
+				   timeout: 3000 //in milliseconds
+				});
+			}
+			
+			jQuery.noConflict().when(ajax1()).done(renderContent);		
 	   <?php
+		}
+		else
+		{
+		?>
+		renderContent(null);
+		<?php
+		}
+		echo '</script>';
 	   echo '</div>';
 	   echo $after_widget;
 	}
