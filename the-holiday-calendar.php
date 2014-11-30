@@ -323,11 +323,12 @@ class the_holiday_calendar extends WP_Widget {
 			
 			// The Loop
 			if ( $query->have_posts() ) {
-				
+				$separator = '';
 				while ( $query->have_posts() ) {
 					$query->the_post();
 					$metaData = get_post_meta( $query->post->ID, 'eventDate', true );
-					echo '[\'' . $this->formatDate($metaData, $dateFormat) . '\',\'' . get_the_title() . '\',\'' . $metaData . '\']';
+					echo $separator . '[\'' . $this->formatDate($metaData, $dateFormat) . '\',\'' . get_the_title() . '\',\'' . $metaData . '\']';
+					$separator = ',';
 				}
 			} else {
 				echo '/* no posts found */';
@@ -352,6 +353,7 @@ class the_holiday_calendar extends WP_Widget {
 			events = events.slice(0, 3);
 			
 			events.forEach(function(event) {
+				console.log(event);
 				output += '<div class="thc-holiday" style="display: table-row;">';
 				output += '<div class="date" style="display: table-cell; padding-right: 10px;">' + event[0] + '</div><div class="name" style="display: table-cell; padding-bottom: 10px;">' + event[1] + '</div>';						
 				output += '</div>';
@@ -376,7 +378,7 @@ class the_holiday_calendar extends WP_Widget {
 			var dateFormat = '<?php echo $dateFormat; ?>';
 					
 			jQuery.noConflict().ajax({
-			   url: 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=1.2&amountOfHolidays=3&fromDate=' + curr_year + '-' + curr_month + '-' + curr_date + '&pluginId=' + unique_id + '&url=' + site_url + '&countryIso=' + countryIso + '&dateFormat=' + dateFormat,
+			   url: 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=1.3&amountOfHolidays=3&fromDate=' + curr_year + '-' + curr_month + '-' + curr_date + '&pluginId=' + unique_id + '&url=' + site_url + '&countryIso=' + countryIso + '&dateFormat=' + dateFormat,
 			   success: function(data){	
 					rows = data.split('\r\n');
 					
