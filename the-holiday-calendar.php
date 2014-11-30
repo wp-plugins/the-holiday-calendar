@@ -173,8 +173,7 @@ class the_holiday_calendar extends WP_Widget {
 		}
 		
 		$countries = array('United States' => 'US', 'India' => 'IN', 'Japan' => 'JP', 'Brazil' => 'BR', 'Russia' => 'RU', 'Germany' => 'DE', 'United Kingdom' => 'GB', 'France' => 'FR', 'Mexico' => 'MX', 'South Korea' => 'KR');
-		$selectedCountry = $instance['country2'];
-		$selectedCountry = isset($selectedCountry) ? $selectedCountry : 'US';
+		$selectedCountry = isset($instance['country2']) ? $instance['country2'] : 'US';
 		
 		/*
 			0: dd-mm-yy
@@ -187,8 +186,7 @@ class the_holiday_calendar extends WP_Widget {
 			7: yyyy년 m월 d일
 		*/
 		$dateFormats = array('dd-mm-yy' => '0', 'dd.mm.yy' => '1', 'dd.mm.yyyy' => '2', 'dd/mm/yy' => '3', 'dd/mm/yyyy' => '4', 'mm/dd/yyyy' => '5', 'yy/mm/dd' => '6', 'yyyy년 m월 d일' => '7');
-		$selectedDateFormat = $instance['dateFormat'];
-		$selectedDateFormat = isset($selectedDateFormat) ? $selectedDateFormat : '5'; //is US (default)
+		$selectedDateFormat = isset($instance['dateFormat']) ? $instance['dateFormat'] : '5'; //is US (default)
 		
 		ksort($countries);
 		
