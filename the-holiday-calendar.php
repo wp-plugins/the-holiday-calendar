@@ -11,6 +11,7 @@ Author URI: http://www.mva7.nl
 class the_holiday_calendar extends WP_Widget {
 
 	const POSTTYPE            = 'thc-events';
+	var $dateError;
 
 	// constructor
 	function the_holiday_calendar() {
@@ -23,6 +24,9 @@ class the_holiday_calendar extends WP_Widget {
 		if (!is_admin()) {
 			wp_enqueue_script('jquery');
 		}
+		
+		if (!session_id())
+			session_start();
 	}
 	
 	/**
@@ -51,32 +55,44 @@ class the_holiday_calendar extends WP_Widget {
 		// Retrieve current date for cookie
 		$eventDate = get_post_meta( $post->ID, 'eventDate', true  );
 		
-		$splitted = explode( '-' , $eventDate );
-		
-		$year = $splitted[0];
-		$month = $splitted[1];
-		$day = $splitted[2];
-		
-		$eventDate = $month . '/' . $day . '/' . $year;
+		if($eventDate != '')
+		{
+			$splitted = explode( '-' , $eventDate );
+			
+			$year = $splitted[0];
+			$month = $splitted[1];
+			$day = $splitted[2];
+			
+			$eventDate = $month . '/' . $day . '/' . $year;
+		}
 		
 		?>
-			<script>
-				jQuery(document).ready(function(){
-					jQuery('#EventDate').datepicker({
-					dateFormat : 'm/d/yy'
-					});
-				});
-			</script>
-
 			<table>
 				<tr>
-				<td>Event date:</td>
+				<td>Event date (input: mm/dd/yyyy):</td>
 				<td>
-					<input type="text" name="EventDate" id="EventDate" value="<?php echo $eventDate; ?>" /></td>
+					<input type="text" name="EventDate" id="EventDate" value="<?php echo $eventDate; ?>" /><?php if(!empty($_SESSION['thc_metabox_errors'])) { echo ' <span style="color: red;">' . $_SESSION['thc_metabox_errors'] . '</span>'; } ?></td>
 				</tr>
 			</table>
 			<p>Remark: the post description will be used in the next version of this plugin. (coming soon!)</p>
+			
+			<script>
+					jQuery(document).ready(function(){
+						if(jQuery.fn.datepicker)
+						{
+							jQuery('#EventDate').datepicker({
+								dateFormat : 'm/d/yy'							
+							});
+						}
+					});
+			</script>
 		<?php
+	}
+	
+	public function validateDate($date, $format)
+	{
+		$d = DateTime::createFromFormat($format, $date);
+		return $d && $d->format($format) == $date;
 	}
 	
 	/**
@@ -114,14 +130,23 @@ class the_holiday_calendar extends WP_Widget {
 		// Sanitize the user input.
 		$mydata = sanitize_text_field( $_POST['EventDate'] );
 		
-		$splitted = explode( '/' , $mydata );
-		
-		$year = $splitted[2];
-		$month = $splitted[0];
-		$day = $splitted[1];
+		if($this->validateDate($mydata, 'm/d/Y'))
+		{
+			$splitted = explode( '/' , $mydata );
+			
+			$year = $splitted[2];
+			$month = $splitted[0];
+			$day = $splitted[1];
 
-		// Update the meta field.
-		update_post_meta( $post_id, 'eventDate', $year . '-' . str_pad($month, 2, "0", STR_PAD_LEFT) . '-' . str_pad($day, 2, "0", STR_PAD_LEFT) );		
+			// Update the meta field.
+			update_post_meta( $post_id, 'eventDate', $year . '-' . str_pad($month, 2, "0", STR_PAD_LEFT) . '-' . str_pad($day, 2, "0", STR_PAD_LEFT) );		
+			
+			$_SESSION['thc_metabox_errors'] = '';
+		}
+		else
+		{
+			$_SESSION['thc_metabox_errors'] = 'Wrong input! Please correct or your event will not be visible.';
+		}
 	}
 	
 	function create_post_type() {
