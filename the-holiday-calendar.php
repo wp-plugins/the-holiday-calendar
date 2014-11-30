@@ -1,9 +1,9 @@
 <?php
 /*
 Plugin Name: The Holiday Calendar
-Version: 1.2
+Version: 1.3
 Plugin URI: http://www.theholidaycalendar.com
-Description: Shows upcoming holidays.
+Description: Shows the upcoming holidays.
 Author: Mva7
 Author URI: http://www.mva7.nl
 */
@@ -19,6 +19,10 @@ class the_holiday_calendar extends WP_Widget {
 		add_action( 'init', array( $this, 'create_post_type' ) );
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
 		add_action( 'save_post', array( $this, 'save' ) );
+		
+		if (!is_admin()) {
+			wp_enqueue_script('jquery');
+		}
 	}
 	
 	/**
@@ -315,7 +319,7 @@ class the_holiday_calendar extends WP_Widget {
 			  return 1;
 			}
 			
-		function renderContent(a1){
+		function renderContent(){
 			events.sort(compare);
 			
 			var output = '<div class="thc-holidays" style="display:table; border-collapse: collapse;">';
@@ -346,35 +350,31 @@ class the_holiday_calendar extends WP_Widget {
 			var countryIso = '<?php echo isset($instance['country2']) ? $instance['country2'] : 'US'; ?>';
 			var dateFormat = '<?php echo $dateFormat; ?>';
 					
-			function ajax1() {
-				// NOTE:  This function must return the value 
-				//        from calling the $.ajax() method.
-				return jQuery.noConflict().ajax({
-				   url: 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=1.2&amountOfHolidays=3&fromDate=' + curr_year + '-' + curr_month + '-' + curr_date + '&pluginId=' + unique_id + '&url=' + site_url + '&countryIso=' + countryIso + '&dateFormat=' + dateFormat,
-				   success: function(data){	
-						rows = data.split('\r\n');
-						
-						rows.forEach(function(entry) {								
-							splitted = entry.split('=');
-							if(splitted.length > 1)
-							{
-								var valueToPush = [splitted[0], splitted[1], splitted[2]]; // or "var valueToPush = new Object();" which is the same
-								
-								this.events.push(valueToPush);
-							}
-						});
-					},
-				   timeout: 3000 //in milliseconds
-				});
-			}
-			
-			jQuery.noConflict().when(ajax1()).done(renderContent);		
+			jQuery.noConflict().ajax({
+			   url: 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=1.2&amountOfHolidays=3&fromDate=' + curr_year + '-' + curr_month + '-' + curr_date + '&pluginId=' + unique_id + '&url=' + site_url + '&countryIso=' + countryIso + '&dateFormat=' + dateFormat,
+			   success: function(data){	
+					rows = data.split('\r\n');
+					
+					rows.forEach(function(entry) {								
+						splitted = entry.split('=');
+						if(splitted.length > 1)
+						{
+							var valueToPush = [splitted[0], splitted[1], splitted[2]]; // or "var valueToPush = new Object();" which is the same
+							
+							this.events.push(valueToPush);
+						}
+					});
+					
+					renderContent();
+				},
+			   timeout: 3000 //in milliseconds
+			});
 	   <?php
 		}
 		else
 		{
 		?>
-		renderContent(null);
+		renderContent();
 		<?php
 		}
 		echo '</script>';
