@@ -193,7 +193,7 @@ class the_holiday_calendar extends WP_Widget {
 		ksort($countries);
 		
 		$showPoweredBy = isset($instance['show_powered_by']) ? $instance['show_powered_by'] : '0';
-		$includeThcEvents = isset($instance['includeThcEvents2']) ? $instance['includeThcEvents2'] : '0';
+		$includeThcEvents = isset($instance['includeThcEvents2']) ? $instance['includeThcEvents2'] : '1';
 		?>
 
 		<p>
