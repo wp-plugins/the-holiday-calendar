@@ -23,6 +23,7 @@ No private data will ever be sent to this webservice beside some minor diagnosti
 1. Upload `the-holiday-calendar` directory to the `/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
 3. Go to Appearance -> Widgets and add our widget to your website
+4. Add your own events through the event page in the admin screen
 
 == Frequently Asked Questions ==
 
