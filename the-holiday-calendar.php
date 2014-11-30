@@ -235,7 +235,14 @@ class the_holiday_calendar extends WP_Widget {
 		  $instance['show_powered_by'] = $new_instance['show_powered_by'];
 		  $instance['country2'] = $new_instance['country2'];
 		  $instance['dateFormat'] = $new_instance['dateFormat'];
-		  $instance['includeThcEvents2'] = $new_instance['includeThcEvents2'];
+		  if(isset($new_instance['includeThcEvents2']))
+		  {
+			$instance['includeThcEvents2'] = $new_instance['includeThcEvents2'];
+		  }
+		  else
+		  {
+			$instance['includeThcEvents2'] = '0';
+		  }
 		  
 		  if(!array_key_exists('unique_id', $instance))
 		  {
@@ -364,7 +371,7 @@ class the_holiday_calendar extends WP_Widget {
 		}
 			
 		<?php
-			if(isset($instance['includeThcEvents2']) && $instance['includeThcEvents2'] == '1')
+			if(!isset($instance['includeThcEvents2']) || $instance['includeThcEvents2'] == '1')
 			{
 		?>
 			var d = new Date();
