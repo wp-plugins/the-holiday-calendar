@@ -192,6 +192,7 @@ class the_holiday_calendar extends WP_Widget {
 		
 		$showPoweredBy = isset($instance['show_powered_by']) ? $instance['show_powered_by'] : '0';
 		$includeThcEvents = isset($instance['includeThcEvents2']) ? $instance['includeThcEvents2'] : '1';
+		$displayMode = isset($instance['displayMode']) ? $instance['displayMode'] : '0';
 		?>
 
 		<p>
@@ -217,6 +218,13 @@ class the_holiday_calendar extends WP_Widget {
 			  <option <?php selected( $selectedDateFormat, $code ); ?> value="<?php echo $code; ?>"><?php echo $dateFormat; ?></option>
 			<?php } ?>
 			</select>
+		</p>
+		<p>
+			Display mode:&nbsp;
+			<label><input class="radio" type="radio" <?php checked($displayMode, '0'); ?> id="<?php echo $this->get_field_id('displayMode'); ?>" name="<?php echo $this->get_field_name('displayMode'); ?>" value="0" />			
+			List</label>&nbsp;
+			<label><input class="radio" type="radio" <?php checked($displayMode, '1'); ?> id="<?php echo $this->get_field_id('displayMode'); ?>" name="<?php echo $this->get_field_name('displayMode'); ?>" value="1" />			
+			Calendar</label>
 		</p>
 		<p>
 			<input class="checkbox" type="checkbox" <?php checked($showPoweredBy, '1'); ?> id="<?php echo $this->get_field_id('show_powered_by'); ?>" name="<?php echo $this->get_field_name('show_powered_by'); ?>" value="1" /> 
@@ -246,6 +254,8 @@ class the_holiday_calendar extends WP_Widget {
 		  {
 			$instance['unique_id'] = $this->gen_uuid();
 		  }
+		  
+		  $instance['displayMode'] = $new_instance['displayMode'];
 		  
 		 return $instance;
 	}
@@ -302,6 +312,8 @@ class the_holiday_calendar extends WP_Widget {
 		  echo $before_title . $title . $after_title;
 	   }
 	   
+	   $displayMode = isset($instance['displayMode']) ? $instance['displayMode'] : '0';
+	   
 	   echo '<div id="thc-widget-content">loading..</div>';
 	   if('1' == $instance['show_powered_by'] ) {
 			echo '<br /><div class="thc-widget-footer" style="clear: left;"><span class="thc-powered-by" style="clear: left;">Powered by&nbsp;</span><a href="http://www.theholidaycalendar.com/" title="The Holiday Calendar - All holidays in one overview" target="_blank">The Holiday Calendar</a></div>';
@@ -350,21 +362,26 @@ class the_holiday_calendar extends WP_Widget {
 			  return 1;
 			}
 			
-		function renderContent(){
-			events.sort(compare);
-			
+		function renderContent(viewMode){
 			var output = '<div class="thc-holidays" style="display:table; border-collapse: collapse;">';
 			
-			events = events.slice(0, 3);
-			
-			events.forEach(function(event) {
-				console.log(event);
-				output += '<div class="thc-holiday" style="display: table-row;">';
-				output += '<div class="date" style="display: table-cell; padding-right: 10px;">' + event[0] + '</div><div class="name" style="display: table-cell; padding-bottom: 10px;">' + event[1] + '</div>';						
-				output += '</div>';
-			});
+			if(viewMode==0)
+			{
+				events = events.slice(0, 3);
+				
+				events.forEach(function(event) {
+					output += '<div class="thc-holiday" style="display: table-row;">';
+					output += '<div class="date" style="display: table-cell; padding-right: 10px;">' + event[0] + '</div><div class="name" style="display: table-cell; padding-bottom: 10px;">' + event[1] + '</div>';						
+					output += '</div>';
+				});
+			}
+			else
+			{
+				output += 'calendar';
+			}
 			
 			output += '</div>';
+			
 			document.getElementById('thc-widget-content').innerHTML = output;
 		}
 			
@@ -381,6 +398,7 @@ class the_holiday_calendar extends WP_Widget {
 			var site_url = '<?php echo  site_url(); ?>';
 			var countryIso = '<?php echo isset($instance['country2']) ? $instance['country2'] : 'US'; ?>';
 			var dateFormat = '<?php echo $dateFormat; ?>';
+			var displayMode = '<?php echo $displayMode; ?>';
 					
 			jQuery.noConflict().ajax({
 			   url: 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=1.3&amountOfHolidays=3&fromDate=' + curr_year + '-' + curr_month + '-' + curr_date + '&pluginId=' + unique_id + '&url=' + site_url + '&countryIso=' + countryIso + '&dateFormat=' + dateFormat,
@@ -397,7 +415,8 @@ class the_holiday_calendar extends WP_Widget {
 						}
 					});
 					
-					renderContent();
+					events.sort(compare);
+					renderContent(displayMode);
 				},
 			   timeout: 3000 //in milliseconds
 			});
@@ -406,7 +425,7 @@ class the_holiday_calendar extends WP_Widget {
 		else
 		{
 		?>
-		renderContent();
+		renderContent(displayMode);
 		<?php
 		}
 		echo '</script>';
@@ -439,3 +458,86 @@ class the_holiday_calendar extends WP_Widget {
 
 // register widget
 add_action('widgets_init', create_function('', 'return register_widget("the_holiday_calendar");'));
+
+/* draws a calendar */
+function draw_calendar($month,$year,$sundayFirst = true){
+
+	/* draw table */
+	$calendar = '<table cellpadding="0" cellspacing="0" class="thc-calendar">';
+
+	
+	/* table headings */
+	$headings = '';	
+	if($sundayFirst)
+	{	
+		$headings = array('S','M','T','W','T','F','S');
+	}
+	else
+	{
+		$headings = array('M','T','W','T','F','S','S');
+	}
+	
+	$calendar.= '<tr class="thc-calendar-row"><td class="calendar-day-head">'.implode('</td><td class="calendar-day-head">',$headings).'</td></tr>';
+
+	/* days and weeks vars now ... */
+	$running_day = -1;
+	if($sundayFirst)
+	{
+		$running_day = date('w',mktime(0,0,0,$month,1,$year));
+	}
+	else
+	{
+		$running_day = date('N',mktime(0,0,0,$month,1,$year)) - 1;
+	}
+	
+	$days_in_month = date('t',mktime(0,0,0,$month,1,$year));
+	$days_in_this_week = 1;
+	$day_counter = 0;
+	$dates_array = array();
+
+	/* row for week one */
+	$calendar.= '<tr class="calendar-row">';
+
+	/* print "blank" days until the first of the current week */
+	for($x = 0; $x < $running_day; $x++):
+		$calendar.= '<td class="calendar-day-np"> </td>';
+		$days_in_this_week++;
+	endfor;
+
+	/* keep going with days.... */
+	for($list_day = 1; $list_day <= $days_in_month; $list_day++):
+		$calendar.= '<td class="calendar-day">';
+			/* add in the day number */
+			$calendar.= '<div class="day-number">'.$list_day.'</div>';
+
+			/** QUERY THE DATABASE FOR AN ENTRY FOR THIS DAY !!  IF MATCHES FOUND, PRINT THEM !! **/
+			$calendar.= str_repeat('<p> </p>',2);
+			
+		$calendar.= '</td>';
+		if($running_day == 6):
+			$calendar.= '</tr>';
+			if(($day_counter+1) != $days_in_month):
+				$calendar.= '<tr class="calendar-row">';
+			endif;
+			$running_day = -1;
+			$days_in_this_week = 0;
+		endif;
+		$days_in_this_week++; $running_day++; $day_counter++;
+	endfor;
+
+	/* finish the rest of the days in the week */
+	if($days_in_this_week < 8):
+		for($x = 1; $x <= (8 - $days_in_this_week); $x++):
+			$calendar.= '<td class="calendar-day-np"> </td>';
+		endfor;
+	endif;
+
+	/* final row */
+	$calendar.= '</tr>';
+
+	/* end the table */
+	$calendar.= '</table>';
+	
+	/* all done, return result */
+	return $calendar;
+}
