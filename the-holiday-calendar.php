@@ -377,7 +377,7 @@ class the_holiday_calendar extends WP_Widget {
 			}
 			else
 			{
-				output += 'calendar';
+				output += '<?php echo draw_calendar(date('n'),date('Y'),true); ?>';
 			}
 			
 			output += '</div>';
