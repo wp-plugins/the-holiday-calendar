@@ -17,3 +17,9 @@
 	margin-bottom: 18px;
 	font-weight: bold;
 }
+
+#thc-widget-content .thc-highlight {
+	font-weight: bold;
+	text-decoration: underline;
+	cursor: default;
+}
