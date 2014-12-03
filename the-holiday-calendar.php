@@ -497,16 +497,20 @@ class the_holiday_calendar extends WP_Widget {
 	function draw_calendar($month,$year,$sundayFirst, $instance, $events){
 		//http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=1.3&amountOfHolidays=3&fromDate=2014-12-3&pluginId=3b6bfa54-8bd2-4a5c-a328-9f29d6fb5e00&url=http://wpsandbox.mva7.nl&countryIso=DE&dateFormat=2
 		$url = 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=' . self::PLUGIN_VERSION . '&amountOfHolidays=15&fromDate=' . date('Y-m-d') . '&pluginId=' . $instance['unique_id'];
-		$result = wp_remote_get($url);
-		$rows = explode("\r\n", $result['body']);
-		//echo var_dump($rows);
-		foreach($rows as $row)
-		{	
-			if(!empty($row))
-			{
-				$splitted = explode('=', $row);
-				
-				$events[] = array($splitted[0], $splitted[1], $splitted[2]);
+		$result = wp_remote_get($url, array('timeout' => 3));
+		
+		if(!is_wp_error( $result ))
+		{
+			$rows = explode("\r\n", $result['body']);
+			//echo var_dump($rows);
+			foreach($rows as $row)
+			{	
+				if(!empty($row))
+				{
+					$splitted = explode('=', $row);
+					
+					$events[] = array($splitted[0], $splitted[1], $splitted[2]);
+				}
 			}
 		}
 		

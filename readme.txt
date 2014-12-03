@@ -50,6 +50,10 @@ In the near future we plan to support other countries also.
 
 == Changelog ==
 
+= 1.4 =
+* Added calendar view
+* Fixed validation error while adding event
+
 = 1.3 =
 * Add your own events
 * Holidays are now optional
