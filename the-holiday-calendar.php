@@ -433,7 +433,7 @@ class the_holiday_calendar extends WP_Widget {
 			{
 			?>
 			jQuery.noConflict().ajax({
-			   url: 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=1.3&amountOfHolidays=3&fromDate=' + curr_year + '-' + curr_month + '-' + curr_date + '&pluginId=' + unique_id + '&url=' + site_url + '&countryIso=' + countryIso + '&dateFormat=' + dateFormat,
+			   url: 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=1.4&amountOfHolidays=3&fromDate=' + curr_year + '-' + curr_month + '-' + curr_date + '&pluginId=' + unique_id + '&url=' + site_url + '&countryIso=' + countryIso + '&dateFormat=' + dateFormat,
 			   success: function(data){	
 					rows = data.split('\r\n');
 					
@@ -496,7 +496,7 @@ class the_holiday_calendar extends WP_Widget {
 	/* draws a calendar */
 	function draw_calendar($month,$year,$sundayFirst, $instance, $events){
 		//http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=1.3&amountOfHolidays=3&fromDate=2014-12-3&pluginId=3b6bfa54-8bd2-4a5c-a328-9f29d6fb5e00&url=http://wpsandbox.mva7.nl&countryIso=DE&dateFormat=2
-		$url = 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=' . self::PLUGIN_VERSION . '&amountOfHolidays=15&fromDate=' . date('Y-m-d') . '&pluginId=' . $instance['unique_id'];
+		$url = 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=' . self::PLUGIN_VERSION . '&amountOfHolidays=15&fromDate=' . date('Y-m') . '-01&pluginId=' . $instance['unique_id'];
 		$result = wp_remote_get($url, array('timeout' => 3));
 		
 		if(!is_wp_error( $result ))
