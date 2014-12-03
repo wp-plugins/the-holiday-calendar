@@ -20,6 +20,7 @@ class the_holiday_calendar extends WP_Widget {
 		add_action( 'init', array( $this, 'create_post_type' ) );
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
 		add_action( 'save_post', array( $this, 'save' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'load_css' ) );
 		
 		if (!is_admin()) {
 			wp_enqueue_script('jquery');
@@ -27,6 +28,11 @@ class the_holiday_calendar extends WP_Widget {
 		
 		if (!session_id())
 			session_start();
+	}
+	
+	function load_css() {
+		wp_register_style( 'thc-style', plugins_url('the-holiday-calendar.css', __FILE__) );
+		wp_enqueue_style( 'thc-style' );
 	}
 	
 	/**
@@ -193,6 +199,8 @@ class the_holiday_calendar extends WP_Widget {
 		$showPoweredBy = isset($instance['show_powered_by']) ? $instance['show_powered_by'] : '0';
 		$includeThcEvents = isset($instance['includeThcEvents2']) ? $instance['includeThcEvents2'] : '1';
 		$displayMode = isset($instance['displayMode']) ? $instance['displayMode'] : '0';
+		$firstDayOfWeek = isset($instance['firstDayOfWeek']) ? $instance['firstDayOfWeek'] : '0';
+		
 		?>
 
 		<p>
@@ -227,6 +235,13 @@ class the_holiday_calendar extends WP_Widget {
 			Calendar</label>
 		</p>
 		<p>
+			First day of the week:&nbsp;
+			<label><input class="radio" type="radio" <?php checked($firstDayOfWeek, '0'); ?> id="<?php echo $this->get_field_id('firstDayOfWeek'); ?>" name="<?php echo $this->get_field_name('firstDayOfWeek'); ?>" value="0" />			
+			Sunday</label>&nbsp;
+			<label><input class="radio" type="radio" <?php checked($firstDayOfWeek, '1'); ?> id="<?php echo $this->get_field_id('firstDayOfWeek'); ?>" name="<?php echo $this->get_field_name('firstDayOfWeek'); ?>" value="1" />			
+			Monday</label>
+		</p>
+		<p>
 			<input class="checkbox" type="checkbox" <?php checked($showPoweredBy, '1'); ?> id="<?php echo $this->get_field_id('show_powered_by'); ?>" name="<?php echo $this->get_field_name('show_powered_by'); ?>" value="1" /> 
 			<label for="<?php echo $this->get_field_id('show_powered_by'); ?>">Enable "Powered by The Holiday Calendar". Thank you!!!</label>
 		</p>
@@ -256,6 +271,7 @@ class the_holiday_calendar extends WP_Widget {
 		  }
 		  
 		  $instance['displayMode'] = $new_instance['displayMode'];
+		  $instance['firstDayOfWeek'] = $new_instance['firstDayOfWeek'];
 		  
 		 return $instance;
 	}
@@ -312,7 +328,8 @@ class the_holiday_calendar extends WP_Widget {
 		  echo $before_title . $title . $after_title;
 	   }
 	   
-	   $displayMode = isset($instance['displayMode']) ? $instance['displayMode'] : '0';
+	   $displayMode = isset($instance['displayMode']) ? $instance['displayMode'] : '0';	   
+	   $firstDayOfWeek = isset($instance['firstDayOfWeek']) ? $instance['firstDayOfWeek'] : '0';
 	   
 	   echo '<div id="thc-widget-content">loading..</div>';
 	   if('1' == $instance['show_powered_by'] ) {
@@ -377,7 +394,7 @@ class the_holiday_calendar extends WP_Widget {
 			}
 			else
 			{
-				output += '<?php echo draw_calendar(date('n'),date('Y'),true); ?>';
+				output += '<?php echo draw_calendar(date('n'),date('Y'), $firstDayOfWeek == 0); ?>';
 			}
 			
 			output += '</div>';
@@ -399,6 +416,7 @@ class the_holiday_calendar extends WP_Widget {
 			var countryIso = '<?php echo isset($instance['country2']) ? $instance['country2'] : 'US'; ?>';
 			var dateFormat = '<?php echo $dateFormat; ?>';
 			var displayMode = '<?php echo $displayMode; ?>';
+			var firstDayOfWeek = '<?php echo $firstDayOfWeek; ?>';
 					
 			jQuery.noConflict().ajax({
 			   url: 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=1.3&amountOfHolidays=3&fromDate=' + curr_year + '-' + curr_month + '-' + curr_date + '&pluginId=' + unique_id + '&url=' + site_url + '&countryIso=' + countryIso + '&dateFormat=' + dateFormat,
@@ -464,7 +482,7 @@ function draw_calendar($month,$year,$sundayFirst = true){
 
 	/* draw table */
 	$calendar = '<table cellpadding="0" cellspacing="0" class="thc-calendar">';
-
+	$calendar.= '<caption>' . date('M') . ' ' . date('Y') . '</caption>';
 	
 	/* table headings */
 	$headings = '';	
@@ -477,7 +495,7 @@ function draw_calendar($month,$year,$sundayFirst = true){
 		$headings = array('M','T','W','T','F','S','S');
 	}
 	
-	$calendar.= '<tr class="thc-calendar-row"><td class="calendar-day-head">'.implode('</td><td class="calendar-day-head">',$headings).'</td></tr>';
+	$calendar.= '<tr class="thc-calendar-row"><td class="thc-calendar-day-head">'.implode('</td><td class="thc-calendar-day-head">',$headings).'</td></tr>';
 
 	/* days and weeks vars now ... */
 	$running_day = -1;
@@ -496,28 +514,28 @@ function draw_calendar($month,$year,$sundayFirst = true){
 	$dates_array = array();
 
 	/* row for week one */
-	$calendar.= '<tr class="calendar-row">';
+	$calendar.= '<tr class="thc-calendar-row">';
 
 	/* print "blank" days until the first of the current week */
 	for($x = 0; $x < $running_day; $x++):
-		$calendar.= '<td class="calendar-day-np"> </td>';
+		$calendar.= '<td class="thc-calendar-day-np"> </td>';
 		$days_in_this_week++;
 	endfor;
 
 	/* keep going with days.... */
 	for($list_day = 1; $list_day <= $days_in_month; $list_day++):
-		$calendar.= '<td class="calendar-day">';
+		$calendar.= '<td class="thc-calendar-day">';
 			/* add in the day number */
-			$calendar.= '<div class="day-number">'.$list_day.'</div>';
+			$calendar.= '<div class="thc-day-number">'.$list_day.'</div>';
 
 			/** QUERY THE DATABASE FOR AN ENTRY FOR THIS DAY !!  IF MATCHES FOUND, PRINT THEM !! **/
-			$calendar.= str_repeat('<p> </p>',2);
+			// $calendar.= str_repeat('<p> </p>',2);
 			
 		$calendar.= '</td>';
 		if($running_day == 6):
 			$calendar.= '</tr>';
 			if(($day_counter+1) != $days_in_month):
-				$calendar.= '<tr class="calendar-row">';
+				$calendar.= '<tr class="thc-calendar-row">';
 			endif;
 			$running_day = -1;
 			$days_in_this_week = 0;
@@ -528,7 +546,7 @@ function draw_calendar($month,$year,$sundayFirst = true){
 	/* finish the rest of the days in the week */
 	if($days_in_this_week < 8):
 		for($x = 1; $x <= (8 - $days_in_this_week); $x++):
-			$calendar.= '<td class="calendar-day-np"> </td>';
+			$calendar.= '<td class="thc-calendar-day-np"> </td>';
 		endfor;
 	endif;
 

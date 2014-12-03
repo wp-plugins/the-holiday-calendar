@@ -1,0 +1,19 @@
+#thc-widget-content td  {
+	width: 25px;
+	text-align: center;
+}
+
+#thc-widget-content table {
+	line-height: 2;
+}
+
+#thc-widget-content .thc-calendar-day-head{
+	background-color: rgba(255, 255, 255, 0.1);
+	font-weight: bold;
+}
+
+#thc-widget-content caption {
+	text-transform: uppercase;
+	margin-bottom: 18px;
+	font-weight: bold;
+}
