@@ -337,6 +337,7 @@ class the_holiday_calendar extends WP_Widget {
 	   }
 	   
 	   $dateFormat = isset($instance['dateFormat']) ? $instance['dateFormat'] : '5';
+	   $countryIso = isset($instance['country2']) ? $instance['country2'] : 'US';
 	   
 	   ?>
 	   <script>
@@ -346,7 +347,7 @@ class the_holiday_calendar extends WP_Widget {
 				'meta_query' => array(
 					array(
 						'key'     => 'eventDate',
-						'value'   => date('Y') . '-' . date('m') . '-' . date('d'),
+						'value'   => date('Y') . '-' . date('m') . '-' . ($displayMode == 0 ? date('d') : '01'),
 						'compare' => '>=',
 					),
 				),
@@ -402,8 +403,27 @@ class the_holiday_calendar extends WP_Widget {
 			}
 			else
 			{
-			?>
-				output += '<?php echo $this->draw_calendar(date('n'),date('Y'), $firstDayOfWeek == 0, $instance, $events); ?>';
+				//http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=1.3&amountOfHolidays=3&fromDate=2014-12-3&pluginId=3b6bfa54-8bd2-4a5c-a328-9f29d6fb5e00&url=http://wpsandbox.mva7.nl&countryIso=DE&dateFormat=2
+				$url = 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=' . self::PLUGIN_VERSION . '&amountOfHolidays=15&fromDate=' . date('Y-m') . '-01&pluginId=' . $instance['unique_id'] . '&url=' . site_url() . '&countryIso=' . $countryIso . '&dateFormat=' . $dateFormat;
+			
+				$result = wp_remote_get($url, array('timeout' => 3));
+				
+				if(!is_wp_error( $result ))
+				{
+					$rows = explode("\r\n", $result['body']);
+					//echo var_dump($rows);
+					foreach($rows as $row)
+					{	
+						if(!empty($row))
+						{
+							$splitted = explode('=', $row);
+							
+							$events[] = array($splitted[0], $splitted[1], $splitted[2]);
+						}
+					}
+				}
+				?>
+				output += '<?php echo $this->draw_calendar(date('n'),date('Y'), $firstDayOfWeek == 0, $events); ?>';
 			<?php
 			}
 			?>
@@ -423,7 +443,7 @@ class the_holiday_calendar extends WP_Widget {
 			
 			var unique_id = '<?php echo $instance['unique_id']; ?>';
 			var site_url = '<?php echo  site_url(); ?>';
-			var countryIso = '<?php echo isset($instance['country2']) ? $instance['country2'] : 'US'; ?>';
+			var countryIso = '<?php echo $countryIso; ?>';
 			var dateFormat = '<?php echo $dateFormat; ?>';
 			var firstDayOfWeek = '<?php echo $firstDayOfWeek; ?>';
 			
@@ -494,25 +514,7 @@ class the_holiday_calendar extends WP_Widget {
 	}
 
 	/* draws a calendar */
-	function draw_calendar($month,$year,$sundayFirst, $instance, $events){
-		//http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=1.3&amountOfHolidays=3&fromDate=2014-12-3&pluginId=3b6bfa54-8bd2-4a5c-a328-9f29d6fb5e00&url=http://wpsandbox.mva7.nl&countryIso=DE&dateFormat=2
-		$url = 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=' . self::PLUGIN_VERSION . '&amountOfHolidays=15&fromDate=' . date('Y-m') . '-01&pluginId=' . $instance['unique_id'];
-		$result = wp_remote_get($url, array('timeout' => 3));
-		
-		if(!is_wp_error( $result ))
-		{
-			$rows = explode("\r\n", $result['body']);
-			//echo var_dump($rows);
-			foreach($rows as $row)
-			{	
-				if(!empty($row))
-				{
-					$splitted = explode('=', $row);
-					
-					$events[] = array($splitted[0], $splitted[1], $splitted[2]);
-				}
-			}
-		}
+	function draw_calendar($month,$year,$sundayFirst, $events){	
 		
 		/* draw table */
 		$calendar = '<table cellpadding="0" cellspacing="0" class="thc-calendar">';
