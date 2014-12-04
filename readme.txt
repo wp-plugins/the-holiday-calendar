@@ -47,6 +47,7 @@ In the near future we plan to support other countries also.
 == Screenshots ==
 
 1. The plugin in action
+2. Calendar view is also supported
 
 == Changelog ==
 
