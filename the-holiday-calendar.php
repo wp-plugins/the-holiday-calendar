@@ -515,7 +515,7 @@ class the_holiday_calendar extends WP_Widget {
 
 	/* draws a calendar */
 	function draw_calendar($month,$year,$sundayFirst, $events){	
-		
+		$today = date('j');
 		/* draw table */
 		$calendar = '<table cellpadding="0" cellspacing="0" class="thc-calendar">';
 		$calendar.= '<caption>' . date('M') . ' ' . date('Y') . '</caption>';
@@ -560,22 +560,23 @@ class the_holiday_calendar extends WP_Widget {
 
 		/* keep going with days.... */
 		for($list_day = 1; $list_day <= $days_in_month; $list_day++):
-			$calendar.= '<td class="thc-calendar-day">';
+			$highlightCode = $list_day == $today ? ' thc-today' : '';
+			$calendar.= '<td class="thc-calendar-day' . $highlightCode . '">';
 				/* add in the day number */
 				
 				/** QUERY THE DATABASE FOR AN ENTRY FOR THIS DAY !!  IF MATCHES FOUND, PRINT THEM !! **/
 				$foundEvents = $this->searchForEvents($year . '-' . str_pad($month, 2, "0", STR_PAD_LEFT) . '-' . str_pad($list_day, 2, "0", STR_PAD_LEFT), $events);
 				
 				$columnContent = '';
-				
-				if(count($foundEvents) > 0)
+				$numberOfEvents = count($foundEvents);
+				if($numberOfEvents > 0)
 				{
 					$caption = '';
-					$separator = '';
+					$separator = $numberOfEvents > 1 ? '- ' : '';
 					foreach($foundEvents as $foundEvent)
 					{
 						$caption.= $separator . addslashes($events[$foundEvent][1]);
-						$separator = '\r\n';
+						$separator = '\r\n' . $separator;
 					}
 					
 					$columnContent = '<span class="thc-highlight" title="' . $caption . '">' . $list_day . '</span>';

@@ -23,3 +23,7 @@
 	text-decoration: underline;
 	cursor: default;
 }
+
+#thc-widget-content .thc-today {
+	background-color: rgba(255, 255, 255, 0.2);
+}
