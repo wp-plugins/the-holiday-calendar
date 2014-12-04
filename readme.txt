@@ -7,7 +7,7 @@ Stable tag: 1.4.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-An awesome calendar plugin that just works! Shows the upcoming holidays and/or your own events.
+*NEW!* An awesome calendar plugin that just works! Shows the upcoming holidays and/or your own events.
 
 == Description ==
 
@@ -15,7 +15,7 @@ This plugin comes as a widget that shows your upcoming events. If you want you c
 
 Two views are available: calendar view and list view.
 
-If you choose to import the holidays they are imported from a webservice. This happens asynchronous so your website will not get slow.
+If you choose to import the holidays they are fetched from a webservice. This happens asynchronous so your website will not get slow.
 
 For more information about the webservice visit: http://www.mva7.nl/the-holiday-calendar-webservice-manual.html
 
