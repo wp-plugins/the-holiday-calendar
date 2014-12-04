@@ -1,6 +1,6 @@
 === The Holiday Calendar ===
 Contributors: mva7
-Tags: agenda, appointment, availability calendar, calendar, calendar localization, calendar widget, calendario, calendars, Calender, editorial calendar, event, event calendar, event list, event management, event manager, event organizer, event page, event registration, event tracking, event widget, events, events calendar, free calendar, holiday calendar, Interactive Calendar, Kalender, meeting, news calendar, online calendar, Organizer, scheduling, upcoming events, upcoming events widget
+Tags: calendar, calendar localization, calendar widget, calendario, calendars, Calender, event, event calendar, event list, event manager, event page, event widget, events, events calendar, free calendar, holiday, holidays, holiday calendar, upcoming holidays, Kalender, online calendar, Organizer, upcoming events, upcoming events widget
 Requires at least: 3.0.1
 Tested up to: 4.0
 Stable tag: 1.4.2
