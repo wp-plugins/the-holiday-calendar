@@ -15,7 +15,7 @@ This plugin comes as a widget that shows your upcoming events. If you want you c
 
 Two views are available: calendar view and list view.
 
-The optional holidays are imported from a webservice. This happens asynchronous so your website will not get slow.
+If you choose to import the holidays they are imported from a webservice. This happens asynchronous so your website will not get slow.
 
 For more information about the webservice visit: http://www.mva7.nl/the-holiday-calendar-webservice-manual.html
 
