@@ -3,7 +3,7 @@ Contributors: Mva7
 Tags: agenda, appointment, availability calendar, calendar, calendar localization, calendar widget, calendario, calendars, Calender, editorial calendar, event, event calendar, event list, event management, event manager, event organizer, event page, event registration, event tracking, event widget, events, events calendar, free calendar, holiday calendar, Interactive Calendar, Kalender, meeting, news calendar, online calendar, Organizer, scheduling, upcoming events, upcoming events widget
 Requires at least: 3.0.1
 Tested up to: 4.0
-Stable tag: 1.4.1
+Stable tag: 1.4.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -11,13 +11,13 @@ An awesome calendar plugin that just works! Shows the upcoming holidays and/or y
 
 == Description ==
 
-This plugin gives you a widget that shows the upcoming holidays.
+This plugin comes as a widget that shows your upcoming events. If you want you can automatically import the holidays from http://www.theholidaycalendar.com.
 
-The data is loaded from a webservice within www.theholidaycalendar.com.
+Two views are available: calendar view and list view.
 
-This happens in an a-sync manner so your website will not slow down as a result of this. Example request: http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=1.0&amountOfHolidays=3&fromDate=2014-06-23 Parameters: pluginVersion = version of the installed plugin, amountOfHolidays = number of holidays to fetch, fromDate = fetch only holidays after this date.
+The optional holidays are loaded from a webservice within http://www.theholidaycalendar.com. This happens asynchronous so your website will not get slow.
 
-No private data will ever be sent to this webservice beside some minor diagnostic information (i.e. website domain, plugin version, install date etc.)
+For more information about the webservice visit: http://www.mva7.nl/the-holiday-calendar-webservice-manual.html
 
 == Installation ==
 1. Upload `the-holiday-calendar` directory to the `/wp-content/plugins/` directory
