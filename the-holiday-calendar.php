@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: The Holiday Calendar
-Version: 1.4.2
+Version: 1.4.3
 Plugin URI: http://www.theholidaycalendar.com
 Description: Shows the upcoming holidays.
 Author: Mva7
@@ -331,7 +331,7 @@ class the_holiday_calendar extends WP_Widget {
 	   $displayMode = isset($instance['displayMode']) ? $instance['displayMode'] : '0';	   
 	   $firstDayOfWeek = isset($instance['firstDayOfWeek']) ? $instance['firstDayOfWeek'] : '0';
 	   
-	   echo '<div id="thc-widget-content">loading..</div>';
+	   echo '<div class="thc-widget-content">loading..</div>';
 	   if('1' == $instance['show_powered_by'] ) {
 			echo '<br /><div class="thc-widget-footer" style="clear: left;"><span class="thc-powered-by" style="clear: left;">Powered by&nbsp;</span><a href="http://www.theholidaycalendar.com/" title="The Holiday Calendar - All holidays in one overview" target="_blank">The Holiday Calendar</a></div>';
 	   }
@@ -423,13 +423,14 @@ class the_holiday_calendar extends WP_Widget {
 					}
 				}
 				?>
-				output += '<?php echo $this->draw_calendar(date('n'),date('Y'), $firstDayOfWeek == 0, $events); ?>';
+				output += '<div class="widget_calendar"><?php echo $this->draw_calendar(date('n'),date('Y'), $firstDayOfWeek == 0, $events); ?></div>';
 			<?php
 			}
 			?>
 			output += '</div>';
 			
-			document.getElementById('thc-widget-content').innerHTML = output;
+			var j = jQuery.noConflict();
+			j('.thc-widget-content').html(output);
 		}
 			
 		<?php
@@ -518,7 +519,7 @@ class the_holiday_calendar extends WP_Widget {
 		$today = date('j');
 		/* draw table */
 		$calendar = '<table cellpadding="0" cellspacing="0" class="thc-calendar">';
-		$calendar.= '<caption>' . date('M') . ' ' . date('Y') . '</caption>';
+		$calendar.= '<caption>' . date('F') . ' ' . date('Y') . '</caption>';
 		
 		/* table headings */
 		$headings = '';	
@@ -531,7 +532,7 @@ class the_holiday_calendar extends WP_Widget {
 			$headings = array('M','T','W','T','F','S','S');
 		}
 		
-		$calendar.= '<tr class="thc-calendar-row"><td class="thc-calendar-day-head">'.implode('</td><td class="thc-calendar-day-head">',$headings).'</td></tr>';
+		$calendar.= '<thead><tr class="thc-calendar-row"><th class="thc-calendar-day-head" scope="col">'.implode('</th><th class="thc-calendar-day-head" scope="col">',$headings).'</th></tr></thead>';
 
 		/* days and weeks vars now ... */
 		$running_day = -1;

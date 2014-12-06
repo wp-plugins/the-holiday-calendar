@@ -1,29 +1,18 @@
-#thc-widget-content td  {
-	width: 25px;
-	text-align: center;
+.thc-holidays,
+.thc-widget-content table {
+	width: 100%;
 }
 
-#thc-widget-content table {
+.thc-widget-content table {
 	line-height: 2;
 }
 
-#thc-widget-content .thc-calendar-day-head{
-	background-color: rgba(255, 255, 255, 0.1);
-	font-weight: bold;
-}
-
-#thc-widget-content caption {
-	text-transform: uppercase;
-	margin-bottom: 18px;
-	font-weight: bold;
-}
-
-#thc-widget-content .thc-highlight {
+.thc-widget-content .thc-highlight {
 	font-weight: bold;
 	text-decoration: underline;
 	cursor: default;
 }
 
-#thc-widget-content .thc-today {
+.thc-widget-content .thc-today {
 	background-color: rgba(255, 255, 255, 0.2);
 }
