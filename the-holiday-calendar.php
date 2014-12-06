@@ -333,7 +333,7 @@ class the_holiday_calendar extends WP_Widget {
 	   
 	   echo '<div class="thc-widget-content">loading..</div>';
 	   if('1' == $instance['show_powered_by'] ) {
-			echo '<br /><div class="thc-widget-footer" style="clear: left;"><span class="thc-powered-by" style="clear: left;">Powered by&nbsp;</span><a href="http://www.theholidaycalendar.com/" title="The Holiday Calendar - All holidays in one overview" target="_blank">The Holiday Calendar</a></div>';
+			echo '<div class="thc-widget-footer" style="clear: left;"><span class="thc-powered-by" style="clear: left;">Powered by&nbsp;</span><a href="http://www.theholidaycalendar.com/" title="The Holiday Calendar - All holidays in one overview" target="_blank">The Holiday Calendar</a></div>';
 	   }
 	   
 	   $dateFormat = isset($instance['dateFormat']) ? $instance['dateFormat'] : '5';
