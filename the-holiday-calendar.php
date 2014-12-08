@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: The Holiday Calendar
-Version: 1.4.4
+Version: 1.4.4.1
 Plugin URI: http://www.theholidaycalendar.com
 Description: Shows the upcoming holidays.
 Author: Mva7
@@ -9,7 +9,7 @@ Author URI: http://www.mva7.nl
 */
 
 class the_holiday_calendar extends WP_Widget {
-	const PLUGIN_VERSION            = '1.4.3';
+	const PLUGIN_VERSION            = '1.4.4';
 	const POSTTYPE            = 'thc-events';
 	var $dateError;
 
