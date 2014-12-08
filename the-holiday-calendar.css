@@ -19,6 +19,7 @@
 }
 
 .thc-widget-content tbody td,
-.thc-widget-content thead th {
+.thc-widget-content thead th,
+.thc-widget-content caption {
 	text-align: center;
 }
