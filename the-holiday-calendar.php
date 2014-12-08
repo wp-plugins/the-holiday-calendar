@@ -9,7 +9,7 @@ Author URI: http://www.mva7.nl
 */
 
 class the_holiday_calendar extends WP_Widget {
-	const PLUGIN_VERSION            = '1.4.4';
+	const PLUGIN_VERSION            = '1.4.3';
 	const POSTTYPE            = 'thc-events';
 	var $dateError;
 
