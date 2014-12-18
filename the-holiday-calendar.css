@@ -23,3 +23,12 @@
 .thc-widget-content caption {
 	text-align: center;
 }
+
+/* Theme Compatibility */
+
+/* Twenty Fourteen */
+@media screen and (min-width: 1080px) {
+	.mva7-thc-activetheme-twentyfourteen .mva7-thc-main {
+		padding-left: 222px;
+	}
+}

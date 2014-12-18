@@ -15,12 +15,16 @@ class the_holiday_calendar extends WP_Widget {
 
 	// constructor
 	function the_holiday_calendar() {
-		parent::WP_Widget(false, $name = __('The Holiday Calendar', 'wp_widget_plugin') );
+		parent::WP_Widget(false, $name = __('The Holiday Calendar', 'wp_widget_plugin') );			
 		
 		add_action( 'init', array( $this, 'create_post_type' ) );
+		
+		add_filter( 'template_include', array( $this, 'include_template_function'), 1 );
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
 		add_action( 'save_post', array( $this, 'save' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'load_css' ) );
+
+		add_filter( 'body_class', array( $this, 'add_body_classes') );
 		
 		if (!is_admin()) {
 			wp_enqueue_script('jquery');
@@ -28,6 +32,45 @@ class the_holiday_calendar extends WP_Widget {
 		
 		if (!session_id())
 			session_start();
+	}
+	
+	function add_body_classes( $classes ) {
+	// add 'class-name' to the $classes array
+	$classes[] = 'mva7-thc-activetheme-' . get_template();
+	// return the $classes array
+	return $classes;
+}
+	
+	function include_template_function( $template_path ) {
+		if ( get_post_type() == self::POSTTYPE ) {
+			if ( is_archive()) {
+				// checks if the file exists in the theme first,
+				// otherwise serve the file from the plugin
+				if ( $theme_file = locate_template( array ( 'dayView.php' ) ) ) {
+					$template_path = $theme_file;
+				} else {
+					$template_path = plugin_dir_path( __FILE__ ) . '/dayView.php';
+				}
+			}
+		}
+		return $template_path;
+	}
+	
+	function create_post_type() {
+		register_post_type( self::POSTTYPE,
+			array(
+			'labels' => array(
+				'name' => __( 'Events' ),
+				'singular_name' => __( 'Event' ),
+			),
+			'rewrite' => array( 'slug' => 'events', 'with_front' => true ),
+			'public' => true,
+			'has_archive' => true,
+			'menu_position' => 5,
+			'menu_icon' => 'dashicons-calendar-alt'
+			)
+		);
+		flush_rewrite_rules( false );
 	}
 	
 	function load_css() {
@@ -153,22 +196,8 @@ class the_holiday_calendar extends WP_Widget {
 		{
 			$_SESSION['thc_metabox_errors'] = 'Wrong input! Please correct or your event will not be visible.';
 		}
-	}
+	}	
 	
-	function create_post_type() {
-	  register_post_type( self::POSTTYPE,
-		array(
-		  'labels' => array(
-			'name' => __( 'Events' ),
-			'singular_name' => __( 'Event' )
-		  ),
-		  'public' => true,
-		  'has_archive' => true,
-		  'menu_position' => 5,
-		  'menu_icon' => 'dashicons-calendar-alt'
-		)
-	  );
-	}
 	// widget form creation
 	function form($instance) {
 		// Check values
