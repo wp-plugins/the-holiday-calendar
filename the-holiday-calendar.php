@@ -54,7 +54,7 @@ class the_holiday_calendar extends WP_Widget {
 	
 	function include_template_function( $template_path ) {
 		global $wp_query, $post;
-		if ( $wp_query->query['post_type'] == ThcConstants::POSTTYPE && $wp_query->post_count == 0 ) {
+		if ( isset($wp_query->query['post_type']) && $wp_query->query['post_type'] == ThcConstants::POSTTYPE && $wp_query->post_count == 0 ) {
 			status_header( '200' );
 			$wp_query->is_404 = false;
 			$wp_query->is_archive = true;
