@@ -8,9 +8,11 @@ Author: Mva7
 Author URI: http://www.mva7.nl
 */
 
+require_once('helpers/thc-helper.class.php');
+require_once('constants/thc-constants.class.php');
+
 class the_holiday_calendar extends WP_Widget {
-	const PLUGIN_VERSION            = '1.4.4.1';
-	const POSTTYPE            = 'thc-events';
+	
 	var $dateError;
 
 	// constructor
@@ -19,6 +21,7 @@ class the_holiday_calendar extends WP_Widget {
 		
 		add_action( 'init', array( $this, 'create_post_type' ) );
 		
+		add_filter( 'query_vars', array( $this, 'add_queryvars' ) );
 		add_filter( 'template_include', array( $this, 'include_template_function'), 1 );
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
 		add_action( 'save_post', array( $this, 'save' ) );
@@ -34,6 +37,14 @@ class the_holiday_calendar extends WP_Widget {
 			session_start();
 	}
 	
+	function add_queryvars( $qvars )
+	{
+	  $qvars[] = 'date';
+	  $qvars[] = 'dateFormat';
+	  $qvars[] = 'country';
+	  return $qvars;
+	}
+	
 	function add_body_classes( $classes ) {
 	// add 'class-name' to the $classes array
 	$classes[] = 'mva7-thc-activetheme-' . get_template();
@@ -42,7 +53,7 @@ class the_holiday_calendar extends WP_Widget {
 }
 	
 	function include_template_function( $template_path ) {
-		if ( get_post_type() == self::POSTTYPE ) {
+		if ( get_post_type() == ThcConstants::POSTTYPE ) {
 			if ( is_archive()) {
 				// checks if the file exists in the theme first,
 				// otherwise serve the file from the plugin
@@ -57,13 +68,13 @@ class the_holiday_calendar extends WP_Widget {
 	}
 	
 	function create_post_type() {
-		register_post_type( self::POSTTYPE,
+		register_post_type( ThcConstants::POSTTYPE,
 			array(
 			'labels' => array(
 				'name' => __( 'Events' ),
 				'singular_name' => __( 'Event' ),
 			),
-			'rewrite' => array( 'slug' => 'events', 'with_front' => true ),
+			'rewrite' => array( 'slug' => ThcConstants::EVENTS_SLUG, 'with_front' => true ),
 			'public' => true,
 			'has_archive' => true,
 			'menu_position' => 5,
@@ -87,7 +98,7 @@ class the_holiday_calendar extends WP_Widget {
 			'some_meta_box_name'
 			,__( 'The Holiday Calendar', 'myplugin_textdomain' )
 			,array( $this, 'render_meta_box_content' )
-			,self::POSTTYPE
+			,ThcConstants::POSTTYPE
 			,'normal'
 			,'high'
 		);   
@@ -304,43 +315,6 @@ class the_holiday_calendar extends WP_Widget {
 		  
 		 return $instance;
 	}
-	
-	function formatDate($dateToFormat, $format)
-	{
-		$dateToFormat = date_create_from_format('Y-m-d', $dateToFormat);
-		/*
-			0: dd-mm-yy
-			1: dd.mm.yy
-			2: dd.mm.yyyy
-			3: dd/mm/yy
-			4: dd/mm/yyyy
-			5: mm/dd/yyyy (US)
-			6: yy/mm/dd
-			7: yyyy년 m월 d일
-		*/
-
-		switch ($format)
-		{
-			case 0:
-				return date_format($dateToFormat,"d-m-y");//dateToFormat.ToString("dd-MM-yy", CultureInfo.InvariantCulture);
-			case 1:
-				return date_format($dateToFormat,"d.m.y");//return dateToFormat.ToString("dd.MM.yy", CultureInfo.InvariantCulture);
-			case 2:
-				return date_format($dateToFormat,"d.m.Y");//return dateToFormat.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture);
-			case 3:
-				return date_format($dateToFormat,"d/m/y");//return dateToFormat.ToString("dd/MM/yy", CultureInfo.InvariantCulture);
-			case 4:
-				return date_format($dateToFormat,"d/m/Y");//return dateToFormat.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
-			case 5:
-				return date_format($dateToFormat,"m/d/Y");//return DateHelper.FormatUSDateShort(dateToFormat);
-			case 6:
-				return date_format($dateToFormat,"y/m/d");//return dateToFormat.ToString("yy/MM/dd", CultureInfo.InvariantCulture);
-			case 7:
-				return date_format($dateToFormat,"Y년 m월 d일");//return dateToFormat.ToString("yyyy년 M월 d일", CultureInfo.InvariantCulture);
-		}
-
-		throw new InvalidOperationException("Date format not supported");
-	}
 
 	// display widget
 	function widget($args, $instance) {
@@ -372,7 +346,7 @@ class the_holiday_calendar extends WP_Widget {
 	   <script>
 	    var events = [<?php			
 			$args = array(
-				'post_type'  => self::POSTTYPE,
+				'post_type'  => ThcConstants::POSTTYPE,
 				'meta_query' => array(
 					array(
 						'key'     => 'eventDate',
@@ -392,7 +366,7 @@ class the_holiday_calendar extends WP_Widget {
 				while ( $query->have_posts() ) {
 					$query->the_post();
 					$eventDate = get_post_meta( $query->post->ID, 'eventDate', true );					
-					$formattedDate = $this->formatDate($eventDate, $dateFormat);
+					$formattedDate = ThcHelper::formatDate($eventDate, $dateFormat);
 					$title = get_the_title();
 					
 					$events[] = array($formattedDate, $title, $eventDate);
@@ -433,26 +407,9 @@ class the_holiday_calendar extends WP_Widget {
 			else
 			{
 				//http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=1.3&amountOfHolidays=3&fromDate=2014-12-3&pluginId=3b6bfa54-8bd2-4a5c-a328-9f29d6fb5e00&url=http://wpsandbox.mva7.nl&countryIso=DE&dateFormat=2
-				$url = 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=' . self::PLUGIN_VERSION . '&amountOfHolidays=15&fromDate=' . date('Y-m') . '-01&pluginId=' . $instance['unique_id'] . '&url=' . site_url() . '&countryIso=' . $countryIso . '&dateFormat=' . $dateFormat;
-			
-				$result = wp_remote_get($url, array('timeout' => 3));
-				
-				if(!is_wp_error( $result ))
-				{
-					$rows = explode("\r\n", $result['body']);
-					//echo var_dump($rows);
-					foreach($rows as $row)
-					{	
-						if(!empty($row))
-						{
-							$splitted = explode('=', $row);
-							
-							$events[] = array($splitted[0], $splitted[1], $splitted[2]);
-						}
-					}
-				}
+				$events = ThcHelper::AddRemoteEvents($events, $countryIso, $dateFormat, $instance['unique_id']);
 				?>
-				output += '<div class="widget_calendar"><?php echo $this->draw_calendar(date('n'),date('Y'), $firstDayOfWeek == 0, $events); ?></div>';
+				output += '<div class="widget_calendar"><?php echo $this->draw_calendar(date('n'),date('Y'), $firstDayOfWeek == 0, $events, $dateFormat, $countryIso); ?></div>';
 			<?php
 			}
 			?>
@@ -544,7 +501,7 @@ class the_holiday_calendar extends WP_Widget {
 	}
 
 	/* draws a calendar */
-	function draw_calendar($month,$year,$sundayFirst, $events){	
+	function draw_calendar($month,$year,$sundayFirst, $events, $dateFormat, $countryIso){	
 		$today = date('j');
 		/* draw table */
 		$calendar = '<table cellpadding="0" cellspacing="0" class="thc-calendar">';
@@ -595,7 +552,8 @@ class the_holiday_calendar extends WP_Widget {
 				/* add in the day number */
 				
 				/** QUERY THE DATABASE FOR AN ENTRY FOR THIS DAY !!  IF MATCHES FOUND, PRINT THEM !! **/
-				$foundEvents = $this->searchForEvents($year . '-' . str_pad($month, 2, "0", STR_PAD_LEFT) . '-' . str_pad($list_day, 2, "0", STR_PAD_LEFT), $events);
+				$currentDate = $year . '-' . str_pad($month, 2, "0", STR_PAD_LEFT) . '-' . str_pad($list_day, 2, "0", STR_PAD_LEFT);
+				$foundEvents = $this->searchForEvents($currentDate, $events);
 				
 				$columnContent = '';
 				$numberOfEvents = count($foundEvents);
@@ -609,7 +567,8 @@ class the_holiday_calendar extends WP_Widget {
 						$separator = '\r\n' . $separator;
 					}
 					
-					$columnContent = '<span class="thc-highlight" title="' . $caption . '">' . $list_day . '</span>';
+					$url = site_url() . '/' . ThcConstants::EVENTS_SLUG . '/?date=' . $currentDate . '&dateFormat=' . $dateFormat . '&country=' . $countryIso;
+					$columnContent = '<a class="thc-highlight" title="' . $caption . '" href="' . $url . '">' . $list_day . '</a>';
 				}
 				else
 				{

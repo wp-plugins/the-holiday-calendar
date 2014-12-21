@@ -11,7 +11,7 @@
 .thc-widget-content .thc-highlight {
 	font-weight: bold;
 	text-decoration: underline;
-	cursor: default;
+	/* cursor: default; */
 }
 
 .thc-widget-content .thc-today {
@@ -28,7 +28,11 @@
 
 /* Twenty Fourteen */
 @media screen and (min-width: 1080px) {
-	.mva7-thc-activetheme-twentyfourteen .mva7-thc-main {
+	.mva7-thc-activetheme-twentyfourteen #mva7-thc-main {
 		padding-left: 222px;
 	}
+}
+
+.mva7-thc-activetheme-twentyfourteen #mva7-thc-main #mva7-thc-events {
+	padding: 20px;
 }
