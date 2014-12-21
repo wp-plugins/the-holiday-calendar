@@ -567,7 +567,11 @@ class the_holiday_calendar extends WP_Widget {
 						$separator = '\r\n' . $separator;
 					}
 					
-					$url = site_url() . '/' . ThcConstants::EVENTS_SLUG . '/?date=' . $currentDate . '&dateFormat=' . $dateFormat . '&country=' . $countryIso;
+					$url = get_post_type_archive_link(ThcConstants::POSTTYPE);
+					$url = add_query_arg(array('date' => $currentDate), $url);
+					$url = add_query_arg(array('dateFormat' => $dateFormat), $url);
+					$url = add_query_arg(array('country' => $countryIso), $url);
+					
 					$columnContent = '<a class="thc-highlight" title="' . $caption . '" href="' . $url . '">' . $list_day . '</a>';
 				}
 				else
