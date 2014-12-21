@@ -36,8 +36,10 @@ get_header(); ?>
 		foreach($events as $event)
 		{		
 ?>
-			<h2><?php echo $event[1]; ?></h2>
-			<p><?php echo isset($event[3]) ? $event[3] : '-'; ?></p>
+			<div class="mva7-thc-event">
+				<h2><?php echo $event[1]; ?></h2>
+				<p><?php echo isset($event[3]) ? $event[3] : '-'; ?></p>
+			</div>
 <?php
 		}
 	}

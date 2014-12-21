@@ -24,6 +24,18 @@
 	text-align: center;
 }
 
+#mva7-thc-events  h1 {
+	margin-bottom: 20px;
+}
+
+#mva7-thc-events .mva7-thc-event h2 {
+	margin-bottom: 10px;
+}
+
+#mva7-thc-events .mva7-thc-event p {
+	margin-bottom: 20px;
+}
+
 /* Theme Compatibility */
 
 /* Twenty Fourteen */
@@ -36,3 +48,9 @@
 .mva7-thc-activetheme-twentyfourteen #mva7-thc-main #mva7-thc-events {
 	padding: 20px;
 }
+
+/* Twenty Thirteen */
+.mva7-thc-activetheme-twentythirteen #mva7-thc-main #mva7-thc-events {
+	padding-left: 20px;
+}
+
