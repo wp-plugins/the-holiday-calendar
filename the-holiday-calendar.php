@@ -1,15 +1,33 @@
 <?php
 /*
 Plugin Name: The Holiday Calendar
-Version: 1.5.1
+Version: 1.5
 Plugin URI: http://www.theholidaycalendar.com
 Description: Shows the upcoming holidays.
 Author: Mva7
 Author URI: http://www.mva7.nl
 */
 
-require_once('helpers/thc-helper.class.php');
-require_once('constants/thc-constants.class.php');
+require_once('helpers/helper.class.php');
+require_once('gui-elements/calendar.class.php');
+require_once('constants/constants.class.php');
+require_once('admin/widget-form.class.php');
+require_once('widgets/widget.class.php');
+require_once('widgets/widget-manager.class.php');
+require_once('posts/post-manager.class.php');
+require_once('admin/post-form.class.php');
+
+add_action( 'widgets_init', create_function('', 'return register_widget("the_holiday_calendar");'));
+add_action( 'init', array( 'the_holiday_calendar', 'create_post_type' ) );
+add_filter( 'query_vars', array( 'the_holiday_calendar', 'add_queryvars' ) );
+add_action( 'add_meta_boxes', array( 'the_holiday_calendar', 'add_meta_box' ) );
+add_action( 'save_post', array( 'the_holiday_calendar', 'save' ) );
+add_action( 'wp_enqueue_scripts', array( 'the_holiday_calendar', 'load_css' ) );
+add_filter( 'body_class', array( 'the_holiday_calendar', 'add_body_classes') );
+add_filter( 'the_title', array( 'the_holiday_calendar', 'override_title') );
+add_action( 'template_redirect', array( 'the_holiday_calendar', 'override_template') );
+add_filter( 'the_content', array( 'the_holiday_calendar', 'override_content') );
+add_filter( 'wp_title', array( 'the_holiday_calendar', 'override_page_title'), 10, 2 );
 
 class the_holiday_calendar extends WP_Widget {
 	
@@ -17,17 +35,7 @@ class the_holiday_calendar extends WP_Widget {
 
 	// constructor
 	function the_holiday_calendar() {
-		parent::WP_Widget(false, $name = __('The Holiday Calendar', 'wp_widget_plugin') );			
-		
-		add_action( 'init', array( $this, 'create_post_type' ) );
-		
-		add_filter( 'query_vars', array( $this, 'add_queryvars' ) );
-		add_filter( 'template_include', array( $this, 'include_template_function'), 1 );
-		add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
-		add_action( 'save_post', array( $this, 'save' ) );
-		add_action( 'wp_enqueue_scripts', array( $this, 'load_css' ) );
-
-		add_filter( 'body_class', array( $this, 'add_body_classes') );
+		parent::WP_Widget(false, $name = __('The Holiday Calendar', 'wp_widget_plugin') );		
 		
 		if (!is_admin()) {
 			wp_enqueue_script('jquery');
@@ -37,24 +45,76 @@ class the_holiday_calendar extends WP_Widget {
 			session_start();
 	}
 	
+	function override_template() {
+		if(get_post_type() == thc_constants::POSTTYPE )
+		{
+			include(TEMPLATEPATH."/page.php");
+			exit;
+		}
+	}
+	
+	function override_title($title) {
+		if(get_post_type() == thc_constants::POSTTYPE)
+		{
+			if(is_admin())
+			{
+				$title = self::get_requested_date() . ' - ' . $title;
+			}
+			else {
+				if(is_archive() && in_the_loop())
+				{
+					$title = self::get_requested_date();		
+				}
+			}
+		}
+		
+		return $title;
+	}
+	
+	function override_page_title($title, $sep) {
+		if(!is_admin() && get_post_type() == thc_constants::POSTTYPE && is_archive())
+		{
+			$title = self::get_requested_date() . ' | ' . get_bloginfo( 'name' );
+		}
+		
+		return $title;
+	}
+	
+	function get_requested_date() {
+		global $wp_query;
+
+		$day = isset($wp_query->query_vars['date']) ? $wp_query->query_vars['date'] : date('Y-m-d');
+		$dateFormat = isset($wp_query->query_vars['dateFormat']) ? $wp_query->query_vars['dateFormat'] : 5;
+		
+		return thc_helper::formatDate($day, $dateFormat);
+	}
+	
 	function add_queryvars( $qvars )
 	{
 	  $qvars[] = 'date';
 	  $qvars[] = 'dateFormat';
 	  $qvars[] = 'country';
+	  
 	  return $qvars;
 	}
 	
 	function add_body_classes( $classes ) {
-	// add 'class-name' to the $classes array
-	$classes[] = 'mva7-thc-activetheme-' . get_template();
-	// return the $classes array
-	return $classes;
-}
+		// add 'class-name' to the $classes array
+		$classes[] = 'mva7-thc-activetheme-' . get_template();
+		// return the $classes array
+		return $classes;
+	}
 	
 	function include_template_function( $template_path ) {
+		$this->prevent_404_when_no_posts();
+		$new_content = $this->get_content();		
+		
+		return isset($new_content) ? $new_content : $template_path;
+	}
+	
+	function prevent_404_when_no_posts() {
 		global $wp_query, $post;
-		if ( isset($wp_query->query['post_type']) && $wp_query->query['post_type'] == ThcConstants::POSTTYPE && $wp_query->post_count == 0 ) {
+		if ( isset($wp_query->query['post_type']) && $wp_query->query['post_type'] == thc_constants::POSTTYPE && $wp_query->post_count == 0 ) {
 			status_header( '200' );
 			$wp_query->is_404 = false;
 			$wp_query->is_archive = true;
@@ -62,28 +122,33 @@ class the_holiday_calendar extends WP_Widget {
 			$post = new stdClass();
 			$post->post_type = $wp_query->query['post_type'];
 		}
-		if ( get_post_type() == ThcConstants::POSTTYPE ) {
+	}
+	
+	function override_content() {
+		if(get_post_type() == thc_constants::POSTTYPE )
+		{
 			if ( is_archive()) {
 				// checks if the file exists in the theme first,
 				// otherwise serve the file from the plugin
-				if ( $theme_file = locate_template( array ( 'dayView.php' ) ) ) {
+				if ( $theme_file = locate_template( array ( 'posts/views/dayView.php' ) ) ) {
 					$template_path = $theme_file;
 				} else {
-					$template_path = plugin_dir_path( __FILE__ ) . '/dayView.php';
+					$template_path = plugin_dir_path( __FILE__ ) . '/posts/views/dayView.php';
 				}
+				
+				require($template_path);
 			}
 		}
-		return $template_path;
 	}
 	
 	function create_post_type() {
-		register_post_type( ThcConstants::POSTTYPE,
+		register_post_type( thc_constants::POSTTYPE,
 			array(
 			'labels' => array(
 				'name' => __( 'Events' ),
 				'singular_name' => __( 'Event' ),
 			),
-			'rewrite' => array( 'slug' => ThcConstants::EVENTS_SLUG, 'with_front' => true ),
+			'rewrite' => array( 'slug' => thc_constants::EVENTS_SLUG, 'with_front' => true ),
 			'public' => true,
 			'has_archive' => true,
 			'menu_position' => 5,
@@ -106,63 +171,12 @@ class the_holiday_calendar extends WP_Widget {
 		add_meta_box(
 			'some_meta_box_name'
 			,__( 'The Holiday Calendar', 'myplugin_textdomain' )
-			,array( $this, 'render_meta_box_content' )
-			,ThcConstants::POSTTYPE
+			,array( 'thc_post_form', 'render_meta_box_content' )
+			,thc_constants::POSTTYPE
 			,'normal'
 			,'high'
 		);   
-	}
-	
-	public function render_meta_box_content( $post ) {
-		// Add an nonce field so we can check for it later.
-		wp_nonce_field( 'thc_event_detail_box', 'thc_event_detail_box_nonce' );
-
-		// Enqueue Datepicker + jQuery UI CSS
-		wp_enqueue_script( 'jquery-ui-datepicker' );
-		wp_enqueue_style( 'jquery-ui-style', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.1/themes/smoothness/jquery-ui.css', true);		
-		
-		// Retrieve current date for cookie
-		$eventDate = get_post_meta( $post->ID, 'eventDate', true  );
-		
-		if($eventDate != '')
-		{
-			$splitted = explode( '-' , $eventDate );
-			
-			$year = $splitted[0];
-			$month = $splitted[1];
-			$day = $splitted[2];
-			
-			$eventDate = $month . '/' . $day . '/' . $year;
-		}
-		
-		?>
-			<table>
-				<tr>
-				<td>Event date (input: mm/dd/yyyy):</td>
-				<td>
-					<input type="text" name="EventDate" id="EventDate" value="<?php echo $eventDate; ?>" /><?php if(!empty($_SESSION['thc_metabox_errors'])) { echo ' <span style="color: red;">' . $_SESSION['thc_metabox_errors'] . '</span>'; } ?></td>
-				</tr>
-			</table>
-			<p>Remark: the post description is only visible in calendar mode.</p>
-			
-			<script>
-					jQuery(document).ready(function(){
-						if(jQuery.fn.datepicker)
-						{
-							jQuery('#EventDate').datepicker({
-								dateFormat : 'mm/dd/yy'							
-							});
-						}
-					});
-			</script>
-		<?php
-	}
-	
-	public function validateDate($date, $format)
-	{
-		$d = DateTime::createFromFormat($format, $date);
-		return $d && $d->format($format) == $date;
-	}
+	}	
 	
 	/**
 	 * Save the meta when the post is saved.
@@ -170,464 +184,23 @@ class the_holiday_calendar extends WP_Widget {
 	 * @param int $post_id The ID of the post being saved.
 	 */
 	public function save( $post_id ) {		
-		/*
-		 * We need to verify this came from the our screen and with proper authorization,
-		 * because save_post can be triggered at other times.
-		 */
-
-		// Check if our nonce is set.
-		if ( ! isset( $_POST['thc_event_detail_box_nonce'] ) )
-			return $post_id;
-
-		$nonce = $_POST['thc_event_detail_box_nonce'];
-
-		// Verify that the nonce is valid.
-		if ( ! wp_verify_nonce( $nonce, 'thc_event_detail_box' ) )
-			return $post_id;
-
-		// If this is an autosave, our form has not been submitted,
-                //     so we don't want to do anything.
-		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) 
-			return $post_id;
-
-		// Check the user's permissions.
-		if ( ! current_user_can( 'edit_post', $post_id ) )
-			return $post_id;		
-
-		/* OK, its safe for us to save the data now. */
-		
-		// Sanitize the user input.
-		$mydata = sanitize_text_field( $_POST['EventDate'] );
-		
-		if($this->validateDate($mydata, 'm/d/Y'))
-		{
-			$splitted = explode( '/' , $mydata );
-			
-			$year = $splitted[2];
-			$month = $splitted[0];
-			$day = $splitted[1];
-
-			// Update the meta field.
-			update_post_meta( $post_id, 'eventDate', $year . '-' . str_pad($month, 2, "0", STR_PAD_LEFT) . '-' . str_pad($day, 2, "0", STR_PAD_LEFT) );		
-			
-			$_SESSION['thc_metabox_errors'] = '';
-		}
-		else
-		{
-			$_SESSION['thc_metabox_errors'] = 'Wrong input! Please correct or your event will not be visible.';
-		}
+		thc_post_manager::save( $post_id );
 	}	
 	
 	// widget form creation
 	function form($instance) {
-		// Check values
-		if( $instance) {
-			 $title = esc_attr($instance['title']);
-		} else {
-			 $title = '';
-		}
-		
-		$countries = array('United States' => 'US', 'India' => 'IN', 'Japan' => 'JP', 'Brazil' => 'BR', 'Russia' => 'RU', 'Germany' => 'DE', 'United Kingdom' => 'GB', 'France' => 'FR', 'Mexico' => 'MX', 'South Korea' => 'KR');
-		$selectedCountry = isset($instance['country2']) ? $instance['country2'] : 'US';
-		
-		/*
-			0: dd-mm-yy
-			1: dd.mm.yy
-			2: dd.mm.yyyy
-			3: dd/mm/yy
-			4: dd/mm/yyyy
-			5: mm/dd/yyyy (US)
-			6: yy/mm/dd
-			7: yyyy년 m월 d일
-		*/
-		$dateFormats = array('dd-mm-yy' => '0', 'dd.mm.yy' => '1', 'dd.mm.yyyy' => '2', 'dd/mm/yy' => '3', 'dd/mm/yyyy' => '4', 'mm/dd/yyyy' => '5', 'yy/mm/dd' => '6', 'yyyy년 m월 d일' => '7');
-		$selectedDateFormat = isset($instance['dateFormat']) ? $instance['dateFormat'] : '5'; //is US (default)
-		
-		ksort($countries);
-		
-		$showPoweredBy = isset($instance['show_powered_by']) ? $instance['show_powered_by'] : '0';
-		$includeThcEvents = isset($instance['includeThcEvents2']) ? $instance['includeThcEvents2'] : '1';
-		$displayMode = isset($instance['displayMode']) ? $instance['displayMode'] : '0';
-		$firstDayOfWeek = isset($instance['firstDayOfWeek']) ? $instance['firstDayOfWeek'] : '0';
-		
-		?>
-
-		<p>
-			<label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Widget Title', 'wp_widget_plugin'); ?></label>
-			<input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo $title; ?>" />
-		</p>
-		<p>
-			<input class="checkbox" type="checkbox" <?php checked($includeThcEvents, '1'); ?> id="<?php echo $this->get_field_id('includeThcEvents2'); ?>" name="<?php echo $this->get_field_name('includeThcEvents2'); ?>" value="1" /> 
-			<label for="<?php echo $this->get_field_id('includeThcEvents2'); ?>">Include holidays (with settings below)</label>
-		</p>
-		<p>
-			<label for="<?php echo $this->get_field_id('country2'); ?>">Country</label>
-			<select class="widefat" id="<?php echo $this->get_field_id('country2'); ?>" name="<?php echo $this->get_field_name('country2'); ?>" >
-			<?php foreach($countries as $country => $iso) { ?>
-			  <option <?php selected( $selectedCountry, $iso ); ?> value="<?php echo $iso; ?>"><?php echo $country; ?></option>
-			<?php } ?>
-			</select>
-		</p>
-		<p>
-			<label for="<?php echo $this->get_field_id('dateFormat'); ?>">Date format</label>
-			<select class="widefat" id="<?php echo $this->get_field_id('dateFormat'); ?>" name="<?php echo $this->get_field_name('dateFormat'); ?>" >
-			<?php foreach($dateFormats as $dateFormat => $code) { ?>
-			  <option <?php selected( $selectedDateFormat, $code ); ?> value="<?php echo $code; ?>"><?php echo $dateFormat; ?></option>
-			<?php } ?>
-			</select>
-		</p>
-		<p>
-			Display mode:&nbsp;
-			<label><input class="radio" type="radio" <?php checked($displayMode, '0'); ?> id="<?php echo $this->get_field_id('displayMode'); ?>" name="<?php echo $this->get_field_name('displayMode'); ?>" value="0" />			
-			List</label>&nbsp;
-			<label><input class="radio" type="radio" <?php checked($displayMode, '1'); ?> id="<?php echo $this->get_field_id('displayMode'); ?>" name="<?php echo $this->get_field_name('displayMode'); ?>" value="1" />			
-			Calendar</label>
-		</p>
-		<p>
-			First day of the week:&nbsp;
-			<label><input class="radio" type="radio" <?php checked($firstDayOfWeek, '0'); ?> id="<?php echo $this->get_field_id('firstDayOfWeek'); ?>" name="<?php echo $this->get_field_name('firstDayOfWeek'); ?>" value="0" />			
-			Sunday</label>&nbsp;
-			<label><input class="radio" type="radio" <?php checked($firstDayOfWeek, '1'); ?> id="<?php echo $this->get_field_id('firstDayOfWeek'); ?>" name="<?php echo $this->get_field_name('firstDayOfWeek'); ?>" value="1" />			
-			Monday</label>
-		</p>
-		<p>
-			<input class="checkbox" type="checkbox" <?php checked($showPoweredBy, '1'); ?> id="<?php echo $this->get_field_id('show_powered_by'); ?>" name="<?php echo $this->get_field_name('show_powered_by'); ?>" value="1" /> 
-			<label for="<?php echo $this->get_field_id('show_powered_by'); ?>">Enable "Powered by The Holiday Calendar". Thank you!!!</label>
-		</p>
-		<?php
+		thc_widget_form::render_form($instance);
 	}
 
 	// update widget
 	function update($new_instance, $old_instance) {
-		  $instance = $old_instance;
-		  // Fields
-		  $instance['title'] = strip_tags($new_instance['title']);
-		  $instance['show_powered_by'] = $new_instance['show_powered_by'];
-		  $instance['country2'] = $new_instance['country2'];
-		  $instance['dateFormat'] = $new_instance['dateFormat'];
-		  if(isset($new_instance['includeThcEvents2']))
-		  {
-			$instance['includeThcEvents2'] = $new_instance['includeThcEvents2'];
-		  }
-		  else
-		  {
-			$instance['includeThcEvents2'] = '0';
-		  }
-		  
-		  if(!array_key_exists('unique_id', $instance))
-		  {
-			$instance['unique_id'] = $this->gen_uuid();
-		  }
-		  
-		  $instance['displayMode'] = $new_instance['displayMode'];
-		  $instance['firstDayOfWeek'] = $new_instance['firstDayOfWeek'];
-		  
-		 return $instance;
+		$updated_instance = thc_widget_manager::update_widget_instance($new_instance, $old_instance);
+
+		return $updated_instance;
 	}
 
 	// display widget
 	function widget($args, $instance) {
-	   extract( $args );
-	   // these are the widget options
-	   $title = apply_filters('widget_title', $instance['title']);
-	   
-	   echo $before_widget;
-	   // Display the widget
-	   echo '<div class="widget-text wp_widget_plugin_box">';
-
-	   // Check if title is set
-	   if ( $title ) {
-		  echo $before_title . $title . $after_title;
-	   }
-	   
-	   $displayMode = isset($instance['displayMode']) ? $instance['displayMode'] : '0';	   
-	   $firstDayOfWeek = isset($instance['firstDayOfWeek']) ? $instance['firstDayOfWeek'] : '0';
-	   
-	   echo '<div class="thc-widget-content">loading..</div>';
-	   if('1' == $instance['show_powered_by'] ) {
-			echo '<div class="thc-widget-footer" style="clear: left;"><span class="thc-powered-by" style="clear: left;">Powered by&nbsp;</span><a href="http://www.theholidaycalendar.com/" title="The Holiday Calendar - All holidays in one overview" target="_blank">The Holiday Calendar</a></div>';
-	   }
-	   
-	   $dateFormat = isset($instance['dateFormat']) ? $instance['dateFormat'] : '5';
-	   $countryIso = isset($instance['country2']) ? $instance['country2'] : 'US';
-	   
-	   ?>
-	   <script>
-	    var events = [<?php			
-			$args = array(
-				'post_type'  => ThcConstants::POSTTYPE,
-				'meta_query' => array(
-					array(
-						'key'     => 'eventDate',
-						'value'   => date('Y') . '-' . date('m') . '-' . ($displayMode == 0 ? date('d') : '01'),
-						'compare' => '>=',
-					),
-				),
-				'orderby' => 'eventDate',
-				'order' => 'ASC',
-				'posts_per_page' => $displayMode == 0 ? 3 : 100
-			);
-			$query = new WP_Query( $args );	
-			
-			// The Loop
-			if ( $query->have_posts() ) {
-				$separator = '';
-				while ( $query->have_posts() ) {
-					$query->the_post();
-					$eventDate = get_post_meta( $query->post->ID, 'eventDate', true );					
-					$formattedDate = ThcHelper::formatDate($eventDate, $dateFormat);
-					$title = get_the_title();
-					
-					$events[] = array($formattedDate, $title, $eventDate);
-					
-					echo $separator . '[\'' . $formattedDate . '\',\'' . $title . '\',\'' . $eventDate . '\']';
-					$separator = ',';
-				}
-			} else {
-				echo '/* no posts found */';
-			}
-			/* Restore original Post Data */
-			wp_reset_postdata();
-		?>];
-		
-		function compare(a,b) {
-			  if (a[2] < b[2])
-				 return -1;
-			  if (a[2] > b[2])
-				return 1;
-			  return 1;
-			}
-			
-		function renderContent(viewMode){
-			var output = '<div class="thc-holidays" style="display:table; border-collapse: collapse;">';
-			
-			<?php if($displayMode == 0)
-			{
-			?>
-				events = events.slice(0, 3);
-				
-				events.forEach(function(event) {
-					output += '<div class="thc-holiday" style="display: table-row;">';
-					output += '<div class="date" style="display: table-cell; padding-right: 10px;">' + event[0] + '</div><div class="name" style="display: table-cell; padding-bottom: 10px;">' + event[1] + '</div>';						
-					output += '</div>';
-				});
-			<?php
-			}
-			else
-			{
-				//http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=1.3&amountOfHolidays=3&fromDate=2014-12-3&pluginId=3b6bfa54-8bd2-4a5c-a328-9f29d6fb5e00&url=http://wpsandbox.mva7.nl&countryIso=DE&dateFormat=2
-				$events = ThcHelper::AddRemoteEvents($events, $countryIso, $dateFormat, $instance['unique_id']);
-				?>
-				output += '<div class="widget_calendar"><?php echo $this->draw_calendar(date('n'),date('Y'), $firstDayOfWeek == 0, $events, $dateFormat, $countryIso); ?></div>';
-			<?php
-			}
-			?>
-			output += '</div>';
-			
-			var j = jQuery.noConflict();
-			j('.thc-widget-content').html(output);
-		}
-			
-		<?php
-			if(!isset($instance['includeThcEvents2']) || $instance['includeThcEvents2'] == '1')
-			{
-		?>
-			var d = new Date();
-			var curr_date = d.getDate();
-			var curr_month = d.getMonth() + 1; //Months are zero based
-			var curr_year = d.getFullYear();
-			
-			var unique_id = '<?php echo $instance['unique_id']; ?>';
-			var site_url = '<?php echo  site_url(); ?>';
-			var countryIso = '<?php echo $countryIso; ?>';
-			var dateFormat = '<?php echo $dateFormat; ?>';
-			var firstDayOfWeek = '<?php echo $firstDayOfWeek; ?>';
-			
-
-			<?php
-			if($displayMode == 0)
-			{
-			?>
-			jQuery.noConflict().ajax({
-			   url: 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=1.4&amountOfHolidays=3&fromDate=' + curr_year + '-' + curr_month + '-' + curr_date + '&pluginId=' + unique_id + '&url=' + site_url + '&countryIso=' + countryIso + '&dateFormat=' + dateFormat,
-			   success: function(data){	
-					rows = data.split('\r\n');
-					
-					rows.forEach(function(entry) {								
-						splitted = entry.split('=');
-						if(splitted.length > 1)
-						{
-							var valueToPush = [splitted[0], splitted[1], splitted[2]]; // or "var valueToPush = new Object();" which is the same
-							
-							this.events.push(valueToPush);
-						}
-					});
-					events.sort(compare);
-					renderContent();
-				},
-			   timeout: 3000 //in milliseconds
-			});
-			<?php
-			}
-			else
-			{
-			?>
-			renderContent();
-	   <?php
-			}
-		}
-		else
-		{
-		?>
-		renderContent();
-		<?php
-		}
-		echo '</script>';
-	   echo '</div>';
-	   echo $after_widget;
-	}
-	
-	function gen_uuid() {
-		return sprintf( '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-			// 32 bits for "time_low"
-			mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ),
-
-			// 16 bits for "time_mid"
-			mt_rand( 0, 0xffff ),
-
-			// 16 bits for "time_hi_and_version",
-			// four most significant bits holds version number 4
-			mt_rand( 0, 0x0fff ) | 0x4000,
-
-			// 16 bits, 8 bits for "clk_seq_hi_res",
-			// 8 bits for "clk_seq_low",
-			// two most significant bits holds zero and one for variant DCE1.1
-			mt_rand( 0, 0x3fff ) | 0x8000,
-
-			// 48 bits for "node"
-			mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff )
-		);
-	}
-
-	/* draws a calendar */
-	function draw_calendar($month,$year,$sundayFirst, $events, $dateFormat, $countryIso){	
-		$today = date('j');
-		/* draw table */
-		$calendar = '<table cellpadding="0" cellspacing="0" class="thc-calendar">';
-		$calendar.= '<caption>' . date('F') . ' ' . date('Y') . '</caption>';
-		
-		/* table headings */
-		$headings = '';	
-		if($sundayFirst)
-		{	
-			$headings = array('S','M','T','W','T','F','S');
-		}
-		else
-		{
-			$headings = array('M','T','W','T','F','S','S');
-		}
-		
-		$calendar.= '<thead><tr class="thc-calendar-row"><th class="thc-calendar-day-head" scope="col">'.implode('</th><th class="thc-calendar-day-head" scope="col">',$headings).'</th></tr></thead>';
-
-		/* days and weeks vars now ... */
-		$running_day = -1;
-		if($sundayFirst)
-		{
-			$running_day = date('w',mktime(0,0,0,$month,1,$year));
-		}
-		else
-		{
-			$running_day = date('N',mktime(0,0,0,$month,1,$year)) - 1;
-		}
-		
-		$days_in_month = date('t',mktime(0,0,0,$month,1,$year));
-		$days_in_this_week = 1;
-		$day_counter = 0;
-		$dates_array = array();
-
-		/* row for week one */
-		$calendar.= '<tr class="thc-calendar-row">';
-
-		/* print "blank" days until the first of the current week */
-		for($x = 0; $x < $running_day; $x++):
-			$calendar.= '<td class="thc-calendar-day-np"> </td>';
-			$days_in_this_week++;
-		endfor;
-
-		/* keep going with days.... */
-		for($list_day = 1; $list_day <= $days_in_month; $list_day++):
-			$highlightCode = $list_day == $today ? ' thc-today' : '';
-			$calendar.= '<td class="thc-calendar-day' . $highlightCode . '">';
-				/* add in the day number */
-				
-				/** QUERY THE DATABASE FOR AN ENTRY FOR THIS DAY !!  IF MATCHES FOUND, PRINT THEM !! **/
-				$currentDate = $year . '-' . str_pad($month, 2, "0", STR_PAD_LEFT) . '-' . str_pad($list_day, 2, "0", STR_PAD_LEFT);
-				$foundEvents = $this->searchForEvents($currentDate, $events);
-				
-				$columnContent = '';
-				$numberOfEvents = count($foundEvents);
-				if($numberOfEvents > 0)
-				{
-					$caption = '';
-					$separator = $numberOfEvents > 1 ? '- ' : '';
-					foreach($foundEvents as $foundEvent)
-					{
-						$caption.= $separator . addslashes($events[$foundEvent][1]);
-						$separator = '\r\n' . $separator;
-					}
-					
-					$url = get_post_type_archive_link(ThcConstants::POSTTYPE);
-					$url = add_query_arg(array('date' => $currentDate), $url);
-					$url = add_query_arg(array('dateFormat' => $dateFormat), $url);
-					$url = add_query_arg(array('country' => $countryIso), $url);
-					
-					$columnContent = '<a class="thc-highlight" title="' . $caption . '" href="' . $url . '">' . $list_day . '</a>';
-				}
-				else
-				{
-					$columnContent = $list_day;
-				}
-				
-				$calendar.= '<div class="thc-day-number">'.$columnContent.'</div>';				
-			$calendar.= '</td>';
-			if($running_day == 6):
-				$calendar.= '</tr>';
-				if(($day_counter+1) != $days_in_month):
-					$calendar.= '<tr class="thc-calendar-row">';
-				endif;
-				$running_day = -1;
-				$days_in_this_week = 0;
-			endif;
-			$days_in_this_week++; $running_day++; $day_counter++;
-		endfor;
-
-		/* finish the rest of the days in the week */
-		if($days_in_this_week < 8):
-			for($x = 1; $x <= (8 - $days_in_this_week); $x++):
-				$calendar.= '<td class="thc-calendar-day-np"> </td>';
-			endfor;
-		endif;
-
-		/* final row */
-		$calendar.= '</tr>';
-
-		/* end the table */
-		$calendar.= '</table>';
-		
-		/* all done, return result */
-		return $calendar;
-	}
-
-	function searchForEvents($date, $array) {
-	   $events = array();
-	   foreach ($array as $key => $val) {
-		   if ($val[2] == $date) {
-			   $events[] = $key;
-		   }
-	   }
-	   return $events;
+	   thc_widget::show($args, $instance);
 	}
 }
-
-// register widget
-add_action('widgets_init', create_function('', 'return register_widget("the_holiday_calendar");'));
