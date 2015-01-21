@@ -50,6 +50,8 @@ In the near future we plan to support other countries also.
 2. Calendar view is also supported
 
 == Changelog ==
+= 1.6 =
+* Events pages now look the same as normal pages
 = 1.5.1 =
 * When no events, an error occured. Fixed now
 = 1.5 =

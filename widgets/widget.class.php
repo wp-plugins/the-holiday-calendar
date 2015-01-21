@@ -49,7 +49,14 @@ class thc_widget {
 				$separator = '';
 				while ( $query->have_posts() ) {
 					$query->the_post();
-					$eventDate = get_post_meta( $query->post->ID, 'eventDate', true );					
+					
+					//skip dummy posts
+					if($query->post->ID == 0)
+					{
+						continue;
+					}
+					
+					$eventDate = get_post_meta( $query->post->ID, 'eventDate', true );								
 					$formattedDate = thc_helper::formatDate($eventDate, $dateFormat);
 					$title = get_the_title();
 					

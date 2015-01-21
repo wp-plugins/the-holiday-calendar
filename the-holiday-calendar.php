@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: The Holiday Calendar
-Version: 1.5
+Version: 1.6
 Plugin URI: http://www.theholidaycalendar.com
 Description: Shows the upcoming holidays.
 Author: Mva7
@@ -9,6 +9,7 @@ Author URI: http://www.mva7.nl
 */
 
 require_once('helpers/helper.class.php');
+require_once('helpers/http-get-helper.class.php');
 require_once('gui-elements/calendar.class.php');
 require_once('constants/constants.class.php');
 require_once('admin/widget-form.class.php');
@@ -26,8 +27,11 @@ add_action( 'wp_enqueue_scripts', array( 'the_holiday_calendar', 'load_css' ) );
 add_filter( 'body_class', array( 'the_holiday_calendar', 'add_body_classes') );
 add_filter( 'the_title', array( 'the_holiday_calendar', 'override_title') );
 add_action( 'template_redirect', array( 'the_holiday_calendar', 'override_template') );
-add_filter( 'the_content', array( 'the_holiday_calendar', 'override_content') );
+//add_filter( 'the_content', array( 'the_holiday_calendar', 'override_content') );
 add_filter( 'wp_title', array( 'the_holiday_calendar', 'override_page_title'), 10, 2 );
+add_action( 'pre_get_posts', array( 'the_holiday_calendar', 'modify_query') );
+//add_filter( 'template_include', array( 'the_holiday_calendar', 'include_template_function'), 1 );
+add_filter('the_posts', array( 'the_holiday_calendar', 'create_dummy_posts'));
 
 class the_holiday_calendar extends WP_Widget {
 	
@@ -45,10 +49,44 @@ class the_holiday_calendar extends WP_Widget {
 			session_start();
 	}
 	
+	function modify_query( $query ) {
+		if ( !is_admin() && $query->is_main_query() && $query->get('post_type') == thc_constants::POSTTYPE ) {
+			$query->set('post_type', thc_constants::POSTTYPE);			
+			$query->set('meta_query', array(
+					array(
+						'key'     => 'eventDate',
+						'value'   => http_get_helper::get_day(),
+						'compare' => '=',
+					),
+				));
+			$query->set('order', 'ASC');
+			$query->set('posts_per_page', 100);		
+		}
+		
+		return $query;
+	}
+	
+	function create_dummy_posts($posts)
+	{
+		global $wp_query;
+			
+		if ( isset($wp_query->query['post_type'])
+			&& $wp_query->query['post_type'] == thc_constants::POSTTYPE ) {
+			$day = isset($wp_query->query_vars['date']) ? $wp_query->query_vars['date'] : date('Y-m-d');
+			$dateFormat = isset($wp_query->query_vars['dateFormat']) ? $wp_query->query_vars['dateFormat'] : 5;
+			$countryIso = isset($wp_query->query_vars['country']) ? $wp_query->query_vars['country'] : 'US';
+			$formattedDate = thc_helper::formatDate($day, $dateFormat);
+		
+			$posts = array_merge($posts, thc_helper::get_remote_events_as_posts($countryIso, $dateFormat, NULL, $day));
+		}
+		return $posts;
+	}
+	
 	function override_template() {
 		if(get_post_type() == thc_constants::POSTTYPE )
-		{
-			include(TEMPLATEPATH."/page.php");
+		{			
+			include(TEMPLATEPATH."/index.php");
+			
 			exit;
 		}
 	}
@@ -63,7 +101,7 @@ class the_holiday_calendar extends WP_Widget {
 			else {
 				if(is_archive() && in_the_loop())
 				{
-					$title = self::get_requested_date();		
+					$title = $title . ' (' . self::get_requested_date() . ')';		
 				}
 			}
 		}
@@ -106,8 +144,8 @@ class the_holiday_calendar extends WP_Widget {
 	}
 	
 	function include_template_function( $template_path ) {
-		$this->prevent_404_when_no_posts();
-		$new_content = $this->get_content();		
+		self::prevent_404_when_no_posts();
+		$new_content = self::get_content();		
 		
 		return isset($new_content) ? $new_content : $template_path;
 	}

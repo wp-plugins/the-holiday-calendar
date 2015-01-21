@@ -1,6 +1,26 @@
 <?php
 class thc_helper
 {
+	function get_remote_events_as_posts($countryIso, $dateFormat, $widgetId = NULL, $date = NULL)
+	{
+		$events = self::add_remote_events(array(), $countryIso, $dateFormat, $widgetId, $date);
+		
+		$posts = array();
+		
+		foreach($events as $event)
+		{
+			$post = new stdClass();
+			$post->post_type = thc_constants::POSTTYPE;		
+			$post->post_content = $event[1];
+			$post->post_title = $event[1];
+			$post->comment_status = 'closed';
+			
+			$posts[] = $post;
+		}
+		
+		return $posts;
+	}
+
 	function add_remote_events($events, $countryIso, $dateFormat, $widgetId = NULL, $date = NULL)
 	{
 		$url = 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=' . thc_constants::PLUGIN_VERSION . '&amountOfHolidays=15&fromDate=' . date('Y-m') . '-01&pluginId=' . (!is_null($widgetId) ? $widgetId : '00000000-0000-0000-0000-000000000000') . '&url=' . site_url() . '&countryIso=' . $countryIso . '&dateFormat=' . $dateFormat;
