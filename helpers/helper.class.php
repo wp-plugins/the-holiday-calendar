@@ -23,24 +23,32 @@ class thc_helper
 
 	function add_remote_events($events, $countryIso, $dateFormat, $widgetId = NULL, $date = NULL)
 	{
-		$url = 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=' . thc_constants::PLUGIN_VERSION . '&amountOfHolidays=15&fromDate=' . date('Y-m') . '-01&pluginId=' . (!is_null($widgetId) ? $widgetId : '00000000-0000-0000-0000-000000000000') . '&url=' . site_url() . '&countryIso=' . $countryIso . '&dateFormat=' . $dateFormat;
-			
-		$result = wp_remote_get($url, array('timeout' => 3));
+		$rows = session_helper::get_remote_events();
 		
-		if(!is_wp_error( $result ))
-		{
-			$rows = explode("\r\n", $result['body']);
-			//echo var_dump($rows);
-			foreach($rows as $row)
-			{			
-				if(!empty($row))
+		if($rows == null) {	
+			$url = 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=' . thc_constants::PLUGIN_VERSION . '&amountOfHolidays=15&fromDate=' . date('Y-m') . '-01&pluginId=' . (!is_null($widgetId) ? $widgetId : '00000000-0000-0000-0000-000000000000') . '&url=' . site_url() . '&countryIso=' . $countryIso . '&dateFormat=' . $dateFormat;				
+			$result = wp_remote_get($url, array('timeout' => 3));
+			
+			if(is_wp_error( $result ))
+			{
+				return $events;
+			}
+			
+			$rows = explode("\r\n", $result['body']);		
+		
+			session_helper::set_remote_events($rows);
+		}
+		
+		//echo var_dump($rows);
+		foreach($rows as $row)
+		{			
+			if(!empty($row))
+			{
+				$splitted = explode('=', $row);
+				
+				if(is_null($date) || $date == $splitted[2])
 				{
-					$splitted = explode('=', $row);
-					
-					if(is_null($date) || $date == $splitted[2])
-					{
-						$events[] = array($splitted[0], $splitted[1], $splitted[2]);
-					}
+					$events[] = array($splitted[0], $splitted[1], $splitted[2]);
 				}
 			}
 		}

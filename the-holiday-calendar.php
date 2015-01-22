@@ -17,6 +17,7 @@ require_once('widgets/widget.class.php');
 require_once('widgets/widget-manager.class.php');
 require_once('posts/post-manager.class.php');
 require_once('admin/post-form.class.php');
+require_once('helpers/session-helper.class.php');
 
 add_action( 'widgets_init', create_function('', 'return register_widget("the_holiday_calendar");'));
 add_action( 'init', array( 'the_holiday_calendar', 'create_post_type' ) );
@@ -26,16 +27,17 @@ add_action( 'save_post', array( 'the_holiday_calendar', 'save' ) );
 add_action( 'wp_enqueue_scripts', array( 'the_holiday_calendar', 'load_css' ) );
 add_filter( 'body_class', array( 'the_holiday_calendar', 'add_body_classes') );
 add_filter( 'the_title', array( 'the_holiday_calendar', 'override_title') );
-add_action( 'template_redirect', array( 'the_holiday_calendar', 'override_template') );
+//add_action( 'template_redirect', array( 'the_holiday_calendar', 'override_template') );
 //add_filter( 'the_content', array( 'the_holiday_calendar', 'override_content') );
 add_filter( 'wp_title', array( 'the_holiday_calendar', 'override_page_title'), 10, 2 );
 add_action( 'pre_get_posts', array( 'the_holiday_calendar', 'modify_query') );
-//add_filter( 'template_include', array( 'the_holiday_calendar', 'include_template_function'), 1 );
 add_filter('the_posts', array( 'the_holiday_calendar', 'create_dummy_posts'));
+// add_filter('widget_posts_args', array( 'the_holiday_calendar', 'filter_recent_posts_widget_parameters')); 
 
 class the_holiday_calendar extends WP_Widget {
 	
 	var $dateError;
+	static $queryIsModified;
 
 	// constructor
 	function the_holiday_calendar() {
@@ -49,8 +51,14 @@ class the_holiday_calendar extends WP_Widget {
 			session_start();
 	}
 	
+	// function filter_recent_posts_widget_parameters($params) {
+	   // print_r($params);
+	   // return $params;
+	// }
+	
 	function modify_query( $query ) {
-		if ( !is_admin() && $query->is_main_query() && $query->get('post_type') == thc_constants::POSTTYPE ) {
+		if ( !is_admin() && $query->get('post_type') == thc_constants::POSTTYPE
+		&& $query->is_main_query()) {
 			$query->set('post_type', thc_constants::POSTTYPE);			
 			$query->set('meta_query', array(
 					array(
@@ -60,7 +68,12 @@ class the_holiday_calendar extends WP_Widget {
 					),
 				));
 			$query->set('order', 'ASC');
-			$query->set('posts_per_page', 100);		
+			$query->set('posts_per_page', 100);	
+
+			self::$queryIsModified = true;
+		}
+		else {
+			self::$queryIsModified = false;
 		}
 		
 		return $query;
@@ -68,17 +81,29 @@ class the_holiday_calendar extends WP_Widget {
 	
 	function create_dummy_posts($posts)
 	{
-		global $wp_query;
-			
-		if ( isset($wp_query->query['post_type'])
-			&& $wp_query->query['post_type'] == thc_constants::POSTTYPE ) {
-			$day = isset($wp_query->query_vars['date']) ? $wp_query->query_vars['date'] : date('Y-m-d');
-			$dateFormat = isset($wp_query->query_vars['dateFormat']) ? $wp_query->query_vars['dateFormat'] : 5;
-			$countryIso = isset($wp_query->query_vars['country']) ? $wp_query->query_vars['country'] : 'US';
-			$formattedDate = thc_helper::formatDate($day, $dateFormat);
+		//TODO smarter check to find out if we are inside the main content
+		// foreach($posts as $post) {
+			// if($post->post_type != thc_constants::POSTTYPE)
+			// {
+				// //If other posts are present, then we are not inside the main content
+				// return $posts;
+			// }
+		// }
 		
-			$posts = array_merge($posts, thc_helper::get_remote_events_as_posts($countryIso, $dateFormat, NULL, $day));
+		if(!self::$queryIsModified)
+		{
+			return $posts;
 		}
+
+		global $wp_query;		
+		
+		$day = isset($wp_query->query_vars['date']) ? $wp_query->query_vars['date'] : date('Y-m-d');
+		$dateFormat = isset($wp_query->query_vars['dateFormat']) ? $wp_query->query_vars['dateFormat'] : 5;
+		$countryIso = isset($wp_query->query_vars['country']) ? $wp_query->query_vars['country'] : 'US';
+		$formattedDate = thc_helper::formatDate($day, $dateFormat);
+	
+		$posts = array_merge($posts, thc_helper::get_remote_events_as_posts($countryIso, $dateFormat, NULL, $day));
+		
 		return $posts;
 	}
 	
@@ -96,7 +121,7 @@ class the_holiday_calendar extends WP_Widget {
 		{
 			if(is_admin())
 			{
-				$title = self::get_requested_date() . ' - ' . $title;
+				//$title = self::get_requested_date() . ' - ' . $title;
 			}
 			else {
 				if(is_archive() && in_the_loop())
@@ -137,46 +162,9 @@ class the_holiday_calendar extends WP_Widget {
 	}
 	
 	function add_body_classes( $classes ) {
-		// add 'class-name' to the $classes array
 		$classes[] = 'mva7-thc-activetheme-' . get_template();
-		// return the $classes array
-		return $classes;
-	}
-	
-	function include_template_function( $template_path ) {
-		self::prevent_404_when_no_posts();
-		$new_content = self::get_content();		
 		
-		return isset($new_content) ? $new_content : $template_path;
-	}
-	
-	function prevent_404_when_no_posts() {
-		global $wp_query, $post;
-		if ( isset($wp_query->query['post_type']) && $wp_query->query['post_type'] == thc_constants::POSTTYPE && $wp_query->post_count == 0 ) {
-			status_header( '200' );
-			$wp_query->is_404 = false;
-			$wp_query->is_archive = true;
-			$wp_query->is_post_type_archive = true;
-			$post = new stdClass();
-			$post->post_type = $wp_query->query['post_type'];
-		}
-	}
-	
-	function override_content() {
-		if(get_post_type() == thc_constants::POSTTYPE )
-		{
-			if ( is_archive()) {
-				// checks if the file exists in the theme first,
-				// otherwise serve the file from the plugin
-				if ( $theme_file = locate_template( array ( 'posts/views/dayView.php' ) ) ) {
-					$template_path = $theme_file;
-				} else {
-					$template_path = plugin_dir_path( __FILE__ ) . '/posts/views/dayView.php';
-				}
-				
-				require($template_path);
-			}
-		}
+		return $classes;
 	}
 	
 	function create_post_type() {

@@ -41,6 +41,7 @@ class thc_widget {
 				'order' => 'ASC',
 				'posts_per_page' => $displayMode == 0 ? 3 : 100
 			);
+			
 			$query = new WP_Query( $args );	
 			$events = array();
 			
@@ -49,12 +50,6 @@ class thc_widget {
 				$separator = '';
 				while ( $query->have_posts() ) {
 					$query->the_post();
-					
-					//skip dummy posts
-					if($query->post->ID == 0)
-					{
-						continue;
-					}
 					
 					$eventDate = get_post_meta( $query->post->ID, 'eventDate', true );								
 					$formattedDate = thc_helper::formatDate($eventDate, $dateFormat);
