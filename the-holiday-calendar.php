@@ -18,6 +18,7 @@ require_once('widgets/widget-manager.class.php');
 require_once('posts/post-manager.class.php');
 require_once('admin/post-form.class.php');
 require_once('helpers/session-helper.class.php');
+require_once('helpers/request-helper.class.php');
 
 add_action( 'widgets_init', create_function('', 'return register_widget("the_holiday_calendar");'));
 add_action( 'init', array( 'the_holiday_calendar', 'create_post_type' ) );
@@ -32,12 +33,10 @@ add_filter( 'the_title', array( 'the_holiday_calendar', 'override_title') );
 add_filter( 'wp_title', array( 'the_holiday_calendar', 'override_page_title'), 10, 2 );
 add_action( 'pre_get_posts', array( 'the_holiday_calendar', 'modify_query') );
 add_filter('the_posts', array( 'the_holiday_calendar', 'create_dummy_posts'));
-// add_filter('widget_posts_args', array( 'the_holiday_calendar', 'filter_recent_posts_widget_parameters')); 
 
 class the_holiday_calendar extends WP_Widget {
 	
 	var $dateError;
-	static $queryIsModified;
 
 	// constructor
 	function the_holiday_calendar() {
@@ -51,14 +50,10 @@ class the_holiday_calendar extends WP_Widget {
 			session_start();
 	}
 	
-	// function filter_recent_posts_widget_parameters($params) {
-	   // print_r($params);
-	   // return $params;
-	// }
-	
-	function modify_query( $query ) {
+	function modify_query( $query ) {	
+		global $wp_query;
 		if ( !is_admin() && $query->get('post_type') == thc_constants::POSTTYPE
-		&& $query->is_main_query()) {
+		&& $query->is_main_query() && array_key_exists('date', $wp_query->query_vars)) {
 			$query->set('post_type', thc_constants::POSTTYPE);			
 			$query->set('meta_query', array(
 					array(
@@ -70,27 +65,18 @@ class the_holiday_calendar extends WP_Widget {
 			$query->set('order', 'ASC');
 			$query->set('posts_per_page', 100);	
 
-			self::$queryIsModified = true;
+			request_helper::set_query_is_modified(true);
 		}
 		else {
-			self::$queryIsModified = false;
+			request_helper::set_query_is_modified(false);
 		}
 		
 		return $query;
 	}
 	
 	function create_dummy_posts($posts)
-	{
-		//TODO smarter check to find out if we are inside the main content
-		// foreach($posts as $post) {
-			// if($post->post_type != thc_constants::POSTTYPE)
-			// {
-				// //If other posts are present, then we are not inside the main content
-				// return $posts;
-			// }
-		// }
-		
-		if(!self::$queryIsModified)
+	{		
+		if(!request_helper::get_query_is_modified())
 		{
 			return $posts;
 		}
