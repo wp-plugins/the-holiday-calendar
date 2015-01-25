@@ -51,7 +51,7 @@ In the near future we plan to support other countries also.
 
 == Changelog ==
 = 1.6 =
-* Events pages now have the same appearance as any other page
+* Event pages now have the same appearance as any other page
 
 = 1.5.1 =
 * When no events, an error occured. Fixed now
