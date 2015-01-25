@@ -52,15 +52,20 @@ In the near future we plan to support other countries also.
 == Changelog ==
 = 1.6 =
 * Events pages now have the same appearance as any other page
+
 = 1.5.1 =
 * When no events, an error occured. Fixed now
+
 = 1.5 =
 * Added detail page with event list
 * Days now clickable in calendar mode
+
 = 1.4.4.1 =
 * Also centered table caption
+
 = 1.4.4 =
 * Calendar content now centered by default
+
 = 1.4.3 =
 * Improved styling calendar view
 
@@ -87,4 +92,3 @@ In the near future we plan to support other countries also.
 
 = 1.0 =
 * First release
-
