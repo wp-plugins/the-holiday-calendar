@@ -33,6 +33,9 @@ add_filter( 'the_title', array( 'the_holiday_calendar', 'override_title') );
 add_filter( 'wp_title', array( 'the_holiday_calendar', 'override_page_title'), 10, 2 );
 add_action( 'pre_get_posts', array( 'the_holiday_calendar', 'modify_query') );
 add_filter('the_posts', array( 'the_holiday_calendar', 'create_dummy_posts'));
+add_filter( 'manage_edit-' . thc_constants::POSTTYPE . '_columns' , array( 'the_holiday_calendar', 'add_date_column' ));
+add_action( 'manage_' . thc_constants::POSTTYPE . '_posts_custom_column', array( 'the_holiday_calendar', 'fill_date_column' ), 10, 2 );
+add_filter( 'manage_edit-' . thc_constants::POSTTYPE . '_sortable_columns', array( 'the_holiday_calendar', 'make_sortable_date_column' ) );
 
 class the_holiday_calendar extends WP_Widget {
 	
@@ -48,6 +51,39 @@ class the_holiday_calendar extends WP_Widget {
 		
 		if (!session_id())
 			session_start();
+	}
+	
+	function make_sortable_date_column( $columns ) {
+		$columns['thc_event_date'] = 'thc_event_date';
+
+		return $columns;
+	}
+	
+	function add_date_column($columns) {
+		unset(
+			$columns['date']
+		);
+		$new_columns = array(
+			'thc_event_date' => 'Event date'
+		);
+		return array_merge($columns, $new_columns);
+	}
+	
+	function fill_date_column( $column, $post_id ) {
+		global $post;
+
+		switch( $column ) {
+
+			/* If displaying the 'duration' column. */
+			case 'thc_event_date' :
+
+				/* Get the post meta. */
+				$event_date = get_post_meta( $post_id, 'eventDate', true );
+
+				echo $event_date;
+
+				break;
+		}
 	}
 	
 	function modify_query( $query ) {	

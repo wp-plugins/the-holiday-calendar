@@ -3,6 +3,7 @@ class thc_helper
 {
 	function get_remote_events_as_posts($countryIso, $dateFormat, $widgetId = NULL, $date = NULL)
 	{
+		global $wp_query, $wp;
 		$events = self::add_remote_events(array(), $countryIso, $dateFormat, $widgetId, $date);
 		
 		$posts = array();
@@ -10,13 +11,45 @@ class thc_helper
 		foreach($events as $event)
 		{
 			$post = new stdClass();
-			$post->post_type = thc_constants::POSTTYPE;		
+			
+			//$post->ID = -1;
+			$post->post_author = 1;
+			$post->post_date = current_time('mysql');
+			$post->post_date_gmt =  current_time('mysql', $gmt = 1);
 			$post->post_content = $event[1];
 			$post->post_title = $event[1];
+			$post->post_excerpt = '';
+			$post->post_status = 'publish';
+			$post->ping_status = 'closed';
+			$post->post_password = '';
+			//$post->post_name = '?' . $_SERVER['QUERY_STRING'];
+			$post->to_ping = '';
+			$post->pinged = '';
+			$post->modified = $post->post_date;
+			$post->modified_gmt = $post->post_date_gmt;
+			$post->post_content_filtered = '';
+			$post->post_parent = 0;
+			//$post->guid = get_home_url('/' . $post->post_name); // use url instead?
+			$post->menu_order = 0;
+			$post->post_type = thc_constants::POSTTYPE;
+			$post->post_mime_type = '';
 			$post->comment_status = 'closed';
+			$post->comment_count = 0;
+			$post->filter = 'raw';
+			$post->ancestors = array(); // 3.6
 			
 			$posts[] = $post;
 		}
+		// reset wp_query properties to simulate a found page
+		unset($wp_query->query['error']);
+		$wp->query = array();
+		$wp_query->query_vars['error'] = '';
+		$wp_query->is_404 = FALSE;
+		
+		$wp_query->found_posts += count($events);
+		$wp_query->post_count += count($events);
+		
+		$wp_query->posts = $posts;
 		
 		return $posts;
 	}
@@ -83,7 +116,7 @@ class thc_helper
 			case 4:
 				return date_format($dateToFormat,"d/m/Y");//return dateToFormat.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
 			case 5:
-				return date_format($dateToFormat,"m/d/Y");//return DateHelper.FormatUSDateShort(dateToFormat);
+				return date_format($dateToFormat,"n/j/Y");//return DateHelper.FormatUSDateShort(dateToFormat);
 			case 6:
 				return date_format($dateToFormat,"y/m/d");//return dateToFormat.ToString("yy/MM/dd", CultureInfo.InvariantCulture);
 			case 7:
