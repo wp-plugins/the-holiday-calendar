@@ -30,7 +30,6 @@
 						<input type="text" name="EventDate" id="EventDate" value="<?php echo $eventDate; ?>" /><?php if(!empty($_SESSION['thc_metabox_errors'])) { echo ' <span style="color: red;">' . $_SESSION['thc_metabox_errors'] . '</span>'; } ?></td>
 					</tr>
 				</table>
-				<p>Remark: the post description is only visible in calendar mode.</p>
 				
 				<script>
 						jQuery(document).ready(function(){
