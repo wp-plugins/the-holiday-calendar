@@ -104,7 +104,10 @@ class thc_widget {
 			else
 			{
 				//http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=1.3&amountOfHolidays=3&fromDate=2014-12-3&pluginId=3b6bfa54-8bd2-4a5c-a328-9f29d6fb5e00&url=http://wpsandbox.mva7.nl&countryIso=DE&dateFormat=2
-				$events = thc_helper::add_remote_events($events, $countryIso, $dateFormat, $instance['unique_id']);
+				if(!isset($instance['includeThcEvents2']) || $instance['includeThcEvents2'] == '1')
+				{
+					$events = thc_helper::add_remote_events($events, $countryIso, $dateFormat, $instance['unique_id']);
+				}
 				?>
 				output += '<div class="widget_calendar"><?php echo thc_calendar::draw_calendar(date('n'),date('Y'), $firstDayOfWeek == 0, $events, $dateFormat, $countryIso); ?></div>';
 			<?php
