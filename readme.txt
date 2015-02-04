@@ -50,6 +50,13 @@ In the near future we plan to support other countries also.
 2. Calendar view is also supported
 
 == Changelog ==
+
+= 1.7 =
+* Added date column to event list in admin screen
+* Events clickable in list mode
+* Include events setting now also works in calendar mode
+* Fixed strange post properties occurring in some themes
+
 = 1.6 =
 * Event pages now have the same appearance as any other page
 
