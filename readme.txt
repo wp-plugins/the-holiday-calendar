@@ -50,6 +50,8 @@ In the near future we plan to support other countries also.
 2. Calendar view is also supported
 
 == Changelog ==
+= 1.7.1 =
+* Added Australian holidays
 
 = 1.7 =
 * Added date column to event list in admin screen
