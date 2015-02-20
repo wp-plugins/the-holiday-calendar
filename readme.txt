@@ -31,6 +31,7 @@ For more information about the webservice visit: http://www.mva7.nl/the-holiday-
 
 For now we only provide holidays for:
 
+Australia,
 Brazil,
 France,
 Germany,
