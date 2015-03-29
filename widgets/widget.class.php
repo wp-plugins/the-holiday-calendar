@@ -25,6 +25,8 @@ class thc_widget {
 		$dateFormat = isset($instance['dateFormat']) ? $instance['dateFormat'] : '5';
 		$countryIso = isset($instance['country2']) ? $instance['country2'] : 'US';
 		$numberOfHolidays = isset($instance['numberOfHolidays']) ? $instance['numberOfHolidays'] : '3';
+		//if firstDayOfWeek is set then this plugin was not new
+		$disableReadMore = isset($instance['disableReadMore']) ? $instance['disableReadMore'] : (isset($instance['firstDayOfWeek']) ? '1' : '0');
 
 		?>
 		<script>
@@ -62,7 +64,7 @@ class thc_widget {
 						$url = get_permalink();
 					}
 					
-					$events[] = array($formattedDate, $title, $eventDate);
+					$events[] = array($formattedDate, $title, $eventDate, '');
 					
 					echo $separator . '[\'' . $formattedDate . '\',\'' . $title . '\',\'' . $eventDate . '\',\'' . $url . '\',\'1\']';
 					$separator = ',';
@@ -150,6 +152,7 @@ class thc_widget {
 								$url = add_query_arg(array('date' => 'replaceDate'), $url);
 								$url = add_query_arg(array('dateFormat' => $dateFormat), $url);
 								$url = add_query_arg(array('country' => $countryIso), $url);
+								$url = add_query_arg(array('readmore' => $disableReadMore == '0' ? '1' : '0'), $url);
 							?>
 							var valueToPush = [splitted[0], splitted[1], splitted[2], '<?php echo $url; ?>'.replace('replaceDate', splitted[2]), '0']; // http://wpsandbox.mva7.nl/events/?date=2015-04-01&dateFormat=4&country=AU or "var valueToPush = new Object();" which is the same
 							

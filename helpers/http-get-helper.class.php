@@ -8,5 +8,14 @@ class http_get_helper {
 		
 		return $day;
 	}
+	
+	function get_readmore()
+	{
+		global $wp_query;
+		
+		$readmore = isset($wp_query->query_vars['readmore']) ? $wp_query->query_vars['readmore'] : '0';
+		
+		return $readmore;
+	}
 } 
 ?>

@@ -178,7 +178,8 @@ class the_holiday_calendar extends WP_Widget {
 	{
 	  $qvars[] = 'date';
 	  $qvars[] = 'dateFormat';
-	  $qvars[] = 'country';
+	  $qvars[] = 'country';	  
+	  $qvars[] = 'readmore';
 	  
 	  return $qvars;
 	}

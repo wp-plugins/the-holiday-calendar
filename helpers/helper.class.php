@@ -3,6 +3,8 @@ class thc_helper
 {
 	function get_remote_events_as_posts($countryIso, $dateFormat, $widgetId = NULL, $date = NULL)
 	{
+		$showReadMore = http_get_helper::get_readmore();
+		
 		global $wp_query, $wp;
 		$events = self::add_remote_events(array(), $countryIso, $dateFormat, $widgetId, $date);
 		
@@ -12,11 +14,18 @@ class thc_helper
 		{
 			$post = new stdClass();
 			
+			$content = $event[1];
+			
+			if($showReadMore == '1')
+			{
+				$content .= '<br /><br /><a href="' . $event[3] . '" target="_blank" title="' . $event[1] . ' on TheHolidayCalendar.com">Read more..</a>';
+			}
+			
 			//$post->ID = -1;
 			$post->post_author = 1;
 			$post->post_date = current_time('mysql');
 			$post->post_date_gmt =  current_time('mysql', $gmt = 1);
-			$post->post_content = $event[1];
+			$post->post_content = $content;
 			$post->post_title = $event[1];
 			$post->post_excerpt = '';
 			$post->post_status = 'publish';
@@ -81,7 +90,7 @@ class thc_helper
 				
 				if(is_null($date) || $date == $splitted[2])
 				{
-					$events[] = array($splitted[0], $splitted[1], $splitted[2]);
+					$events[] = array($splitted[0], $splitted[1], $splitted[2], $splitted[3]);
 				}
 			}
 		}

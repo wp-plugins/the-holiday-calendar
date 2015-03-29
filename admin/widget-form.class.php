@@ -30,8 +30,11 @@ class thc_widget_form {
 		$showPoweredBy = isset($instance['show_powered_by']) ? $instance['show_powered_by'] : '0';
 		$includeThcEvents = isset($instance['includeThcEvents2']) ? $instance['includeThcEvents2'] : '1';
 		$displayMode = isset($instance['displayMode']) ? $instance['displayMode'] : '0';
-		$firstDayOfWeek = isset($instance['firstDayOfWeek']) ? $instance['firstDayOfWeek'] : '0';
+		$firstDayOfWeek = isset($instance['firstDayOfWeek']) ? $instance['firstDayOfWeek'] : '0';		
 		$numberOfHolidays = isset($instance['numberOfHolidays']) ? $instance['numberOfHolidays'] : '3';
+		
+		//if firstDayOfWeek is set then this plugin was not new
+		$disableReadMore = isset($instance['disableReadMore']) ? $instance['disableReadMore'] : (isset($instance['firstDayOfWeek']) ? '1' : '0');
 		
 		?>
 
@@ -80,6 +83,11 @@ class thc_widget_form {
 			  <option <?php selected( $numberOfHolidays, $i ); ?> value="<?php echo $i; ?>"><?php echo $i; ?></option>
 			<?php } ?>
 			</select>
+		</p>
+		
+		<p>
+			<input class="checkbox" type="checkbox" <?php checked($disableReadMore, '1'); ?> id="<?php echo $this->get_field_id('disableReadMore'); ?>" name="<?php echo $this->get_field_name('disableReadMore'); ?>" value="1" /> 
+			<label for="<?php echo $this->get_field_id('disableReadMore'); ?>">Disable 'more info..' link.</label>
 		</p>
 		<p>
 			<input class="checkbox" type="checkbox" <?php checked($showPoweredBy, '1'); ?> id="<?php echo $this->get_field_id('show_powered_by'); ?>" name="<?php echo $this->get_field_name('show_powered_by'); ?>" value="1" /> 
