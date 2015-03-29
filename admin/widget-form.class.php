@@ -31,6 +31,7 @@ class thc_widget_form {
 		$includeThcEvents = isset($instance['includeThcEvents2']) ? $instance['includeThcEvents2'] : '1';
 		$displayMode = isset($instance['displayMode']) ? $instance['displayMode'] : '0';
 		$firstDayOfWeek = isset($instance['firstDayOfWeek']) ? $instance['firstDayOfWeek'] : '0';
+		$numberOfHolidays = isset($instance['numberOfHolidays']) ? $instance['numberOfHolidays'] : '3';
 		
 		?>
 
@@ -68,9 +69,17 @@ class thc_widget_form {
 		<p>
 			First day of the week:&nbsp;
 			<label><input class="radio" type="radio" <?php checked($firstDayOfWeek, '0'); ?> id="<?php echo $this->get_field_id('firstDayOfWeek'); ?>" name="<?php echo $this->get_field_name('firstDayOfWeek'); ?>" value="0" />			
-			Sunday</label>&nbsp;
+			Sun</label>&nbsp;
 			<label><input class="radio" type="radio" <?php checked($firstDayOfWeek, '1'); ?> id="<?php echo $this->get_field_id('firstDayOfWeek'); ?>" name="<?php echo $this->get_field_name('firstDayOfWeek'); ?>" value="1" />			
-			Monday</label>
+			Mon</label>
+		</p>
+		<p>
+			<label for="<?php echo $this->get_field_id('numberOfHolidays'); ?>">Number of holidays</label>
+			<select class="widefat" id="<?php echo $this->get_field_id('numberOfHolidays'); ?>" name="<?php echo $this->get_field_name('numberOfHolidays'); ?>" >
+			<?php for($i = 3; $i <= 5; $i++) { ?>
+			  <option <?php selected( $numberOfHolidays, $i ); ?> value="<?php echo $i; ?>"><?php echo $i; ?></option>
+			<?php } ?>
+			</select>
 		</p>
 		<p>
 			<input class="checkbox" type="checkbox" <?php checked($showPoweredBy, '1'); ?> id="<?php echo $this->get_field_id('show_powered_by'); ?>" name="<?php echo $this->get_field_name('show_powered_by'); ?>" value="1" /> 

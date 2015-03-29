@@ -24,6 +24,10 @@
 	text-align: center;
 }
 
+.thc-widget-content .customEvent {
+	font-weight: bold;
+}
+
 #mva7-thc-events  h1 {
 	margin-bottom: 20px;
 }

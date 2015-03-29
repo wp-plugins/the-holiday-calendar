@@ -24,6 +24,7 @@ class thc_widget {
 
 		$dateFormat = isset($instance['dateFormat']) ? $instance['dateFormat'] : '5';
 		$countryIso = isset($instance['country2']) ? $instance['country2'] : 'US';
+		$numberOfHolidays = isset($instance['numberOfHolidays']) ? $instance['numberOfHolidays'] : '3';
 
 		?>
 		<script>
@@ -39,7 +40,7 @@ class thc_widget {
 				),
 				'orderby' => 'eventDate',
 				'order' => 'ASC',
-				'posts_per_page' => $displayMode == 0 ? 3 : 100
+				'posts_per_page' => $displayMode == 0 ? $numberOfHolidays : 100
 			);
 			
 			$query = new WP_Query( $args );	
@@ -58,16 +59,12 @@ class thc_widget {
 					
 					if(get_the_ID() > 0)
 					{
-						$url = get_post_type_archive_link(thc_constants::POSTTYPE);
-						
-						$url = add_query_arg(array('date' => $eventDate), $url);
-						$url = add_query_arg(array('dateFormat' => $dateFormat), $url);
-						$url = add_query_arg(array('country' => $countryIso), $url);
+						$url = get_permalink();
 					}
 					
 					$events[] = array($formattedDate, $title, $eventDate);
 					
-					echo $separator . '[\'' . $formattedDate . '\',\'' . $title . '\',\'' . $eventDate . '\',\'' . $url . '\']';
+					echo $separator . '[\'' . $formattedDate . '\',\'' . $title . '\',\'' . $eventDate . '\',\'' . $url . '\',\'1\']';
 					$separator = ',';
 				}
 			} else {
@@ -91,11 +88,11 @@ class thc_widget {
 			<?php if($displayMode == 0)
 			{
 			?>
-				events = events.slice(0, 3);
+				events = events.slice(0, <?php echo $numberOfHolidays; ?>);
 				
 				events.forEach(function(event) {
 					output += '<div class="thc-holiday" style="display: table-row;">';					
-					var eventTitle = event[3] != '' ? '<a href="' + event[3] + '" title="' + event[1] + '">' + event[1] + '</a>' : event[1];
+					var eventTitle = event[3] != '' ? '<a href="' + event[3] + '" title="' + event[1] + '"' + (event[4] == '1' ? 'class="customEvent"' : '') + '>' + event[1] + '</a>' : event[1];
 					output += '<div class="date" style="display: table-cell; padding-right: 10px;">' + event[0] + '</div><div class="name" style="display: table-cell; padding-bottom: 10px;">' + eventTitle + '</div>';						
 					output += '</div>';
 				});
@@ -140,7 +137,7 @@ class thc_widget {
 			{
 			?>
 			jQuery.noConflict().ajax({
-			   url: 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=<?php echo thc_constants::PLUGIN_VERSION; ?>&amountOfHolidays=3&fromDate=' + curr_year + '-' + curr_month + '-' + curr_date + '&pluginId=' + unique_id + '&url=' + site_url + '&countryIso=' + countryIso + '&dateFormat=' + dateFormat,
+			   url: 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=<?php echo thc_constants::PLUGIN_VERSION; ?>&amountOfHolidays=<?php echo $numberOfHolidays; ?> &fromDate=' + curr_year + '-' + curr_month + '-' + curr_date + '&pluginId=' + unique_id + '&url=' + site_url + '&countryIso=' + countryIso + '&dateFormat=' + dateFormat,
 			   success: function(data){	
 					rows = data.split('\r\n');
 					
@@ -148,7 +145,13 @@ class thc_widget {
 						splitted = entry.split('=');
 						if(splitted.length > 1)
 						{
-							var valueToPush = [splitted[0], splitted[1], splitted[2], '']; // or "var valueToPush = new Object();" which is the same
+							<?php
+								$url = get_post_type_archive_link(thc_constants::POSTTYPE);
+								$url = add_query_arg(array('date' => 'replaceDate'), $url);
+								$url = add_query_arg(array('dateFormat' => $dateFormat), $url);
+								$url = add_query_arg(array('country' => $countryIso), $url);
+							?>
+							var valueToPush = [splitted[0], splitted[1], splitted[2], '<?php echo $url; ?>'.replace('replaceDate', splitted[2]), '0']; // http://wpsandbox.mva7.nl/events/?date=2015-04-01&dateFormat=4&country=AU or "var valueToPush = new Object();" which is the same
 							
 							this.events.push(valueToPush);
 						}

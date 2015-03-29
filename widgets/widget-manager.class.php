@@ -25,6 +25,7 @@ class thc_widget_manager {
 
 		$instance['displayMode'] = $new_instance['displayMode'];
 		$instance['firstDayOfWeek'] = $new_instance['firstDayOfWeek'];
+		$instance['numberOfHolidays'] = $new_instance['numberOfHolidays'];
 		
 		return $instance;
 	}
