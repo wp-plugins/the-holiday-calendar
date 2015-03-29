@@ -31,7 +31,7 @@ class thc_widget_form {
 		$includeThcEvents = isset($instance['includeThcEvents2']) ? $instance['includeThcEvents2'] : '1';
 		$displayMode = isset($instance['displayMode']) ? $instance['displayMode'] : '0';
 		$firstDayOfWeek = isset($instance['firstDayOfWeek']) ? $instance['firstDayOfWeek'] : '0';		
-		$numberOfHolidays = isset($instance['numberOfHolidays']) ? $instance['numberOfHolidays'] : '3';
+		$numberOfHolidays = isset($instance['numberOfHolidays']) ? $instance['numberOfHolidays'] : '3';	
 		
 		//if firstDayOfWeek is set then this plugin was not new
 		$disableReadMore = isset($instance['disableReadMore']) ? $instance['disableReadMore'] : (isset($instance['firstDayOfWeek']) ? '1' : '0');
