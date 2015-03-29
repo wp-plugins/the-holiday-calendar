@@ -18,7 +18,7 @@ class thc_helper
 			
 			if($showReadMore == '1')
 			{
-				$content .= '<br /><br /><a href="' . $event[3] . '" target="_blank" title="' . $event[1] . ' on TheHolidayCalendar.com">Read more..</a>';
+				$content .= '<br /><br /><a href="' . $event[3] . '" target="_blank" title="Read more about ' . $event[1] . ' on TheHolidayCalendar.com">Read more..</a>';
 			}
 			
 			//$post->ID = -1;
@@ -67,7 +67,8 @@ class thc_helper
 	{
 		$rows = session_helper::get_remote_events();
 		
-		if($rows == null) {	
+		if($rows == null) {
+			
 			$url = 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=' . thc_constants::PLUGIN_VERSION . '&amountOfHolidays=15&fromDate=' . date('Y-m') . '-01&pluginId=' . (!is_null($widgetId) ? $widgetId : '00000000-0000-0000-0000-000000000000') . '&url=' . site_url() . '&countryIso=' . $countryIso . '&dateFormat=' . $dateFormat;				
 			$result = wp_remote_get($url, array('timeout' => 3));
 			

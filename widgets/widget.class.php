@@ -26,7 +26,7 @@ class thc_widget {
 		$countryIso = isset($instance['country2']) ? $instance['country2'] : 'US';
 		$numberOfHolidays = isset($instance['numberOfHolidays']) ? $instance['numberOfHolidays'] : '3';
 		//if firstDayOfWeek is set then this plugin was not new
-		$disableReadMore = isset($instance['disableReadMore']) ? $instance['disableReadMore'] : (isset($instance['firstDayOfWeek']) ? '1' : '0');
+		$enableReadMore = isset($instance['enableReadMore']) ? $instance['enableReadMore'] : (isset($instance['firstDayOfWeek']) ? '0' : '1');
 
 		?>
 		<script>
@@ -152,7 +152,7 @@ class thc_widget {
 								$url = add_query_arg(array('date' => 'replaceDate'), $url);
 								$url = add_query_arg(array('dateFormat' => $dateFormat), $url);
 								$url = add_query_arg(array('country' => $countryIso), $url);
-								$url = add_query_arg(array('readmore' => $disableReadMore == '0' ? '1' : '0'), $url);
+								$url = add_query_arg(array('readmore' => $enableReadMore), $url);
 							?>
 							var valueToPush = [splitted[0], splitted[1], splitted[2], '<?php echo $url; ?>'.replace('replaceDate', splitted[2]), '0']; // http://wpsandbox.mva7.nl/events/?date=2015-04-01&dateFormat=4&country=AU or "var valueToPush = new Object();" which is the same
 							

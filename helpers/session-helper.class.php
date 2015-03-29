@@ -13,5 +13,10 @@ class session_helper {
 	function set_remote_events($events) {
 		$_SESSION[self::remote_events_key] = $events;
 	}
+	
+	function clear_session()
+	{
+		unset($_SESSION[self::remote_events_key]);
+	}
 }
 ?>

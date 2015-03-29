@@ -26,7 +26,9 @@ class thc_widget_manager {
 		$instance['displayMode'] = $new_instance['displayMode'];
 		$instance['firstDayOfWeek'] = $new_instance['firstDayOfWeek'];
 		$instance['numberOfHolidays'] = $new_instance['numberOfHolidays'];
-		$instance['disableReadMore'] = $new_instance['disableReadMore'];
+		$instance['enableReadMore'] = !isset($new_instance['disableReadMore']) ? '1' : '0';
+		
+		session_helper::clear_session();
 		
 		return $instance;
 	}
