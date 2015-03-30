@@ -51,6 +51,11 @@ In the near future we plan to support other countries also.
 2. Calendar view is also supported
 
 == Changelog ==
+= 1.8 =
+* Number of holidays setting
+* Read more links on holiday posts
+* SEO friendly URL for custom events
+
 = 1.7.1 =
 * Added Australian holidays
 
