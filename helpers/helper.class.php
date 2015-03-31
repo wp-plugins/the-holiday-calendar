@@ -14,11 +14,11 @@ class thc_helper
 		{
 			$post = new stdClass();
 			
-			$content = $event[1];
+			$content = '';
 			
 			if($showReadMore == '1')
 			{
-				$content .= '<br /><br /><a href="' . $event[3] . '" target="_blank" title="Read more about ' . $event[1] . ' on TheHolidayCalendar.com">Read more..</a>';
+				$content .= '<br /><br />Read more about <a href="' . $event[3] . '" target="_blank" title="Read more about ' . $event[1] . ' on TheHolidayCalendar.com">' . $event[1] . '</a> on <a href="http://www.theholidaycalendar.com/" title="The Holiday Calendar - All holidays in one place!" target="_blank">TheHolidayCalendar.com</a>.';
 			}
 			
 			//$post->ID = -1;
