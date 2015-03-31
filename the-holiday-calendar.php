@@ -36,6 +36,8 @@ add_filter('the_posts', array( 'the_holiday_calendar', 'create_dummy_posts'));
 add_filter( 'manage_edit-' . thc_constants::POSTTYPE . '_columns' , array( 'the_holiday_calendar', 'add_date_column' ));
 add_action( 'manage_' . thc_constants::POSTTYPE . '_posts_custom_column', array( 'the_holiday_calendar', 'fill_date_column' ), 10, 2 );
 add_filter( 'manage_edit-' . thc_constants::POSTTYPE . '_sortable_columns', array( 'the_holiday_calendar', 'make_sortable_date_column' ) );
+remove_all_filters('get_the_excerpt');
+add_filter('get_the_excerpt', array( 'the_holiday_calendar', 'get_excerpt' ));
 
 class the_holiday_calendar extends WP_Widget {
 	
@@ -51,6 +53,15 @@ class the_holiday_calendar extends WP_Widget {
 		
 		if (!session_id())
 			session_start();
+	}
+	
+	function get_excerpt($excerpt) {
+		if(!request_helper::get_query_was_modified())
+		{
+			return wp_trim_excerpt($excerpt);
+		}
+		
+		return $excerpt;
 	}
 	
 	function make_sortable_date_column( $columns ) {
@@ -100,8 +111,9 @@ class the_holiday_calendar extends WP_Widget {
 				));
 			$query->set('order', 'ASC');
 			$query->set('posts_per_page', 100);	
-
+			
 			request_helper::set_query_is_modified(true);
+			request_helper::set_query_was_modified(true);
 		}
 		else {
 			request_helper::set_query_is_modified(false);
