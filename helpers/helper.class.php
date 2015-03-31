@@ -12,13 +12,15 @@ class thc_helper
 		
 		foreach($events as $event)
 		{
-			$post = new stdClass();
-			
-			$content = '';
+			$post = new stdClass();			
 			
 			if($showReadMore == '1')
 			{
 				$content .= '<br /><br />Read more about <a href="' . $event[3] . '" target="_blank" title="Read more about ' . $event[1] . ' on TheHolidayCalendar.com">' . $event[1] . '</a> on <a href="http://www.theholidaycalendar.com/" title="The Holiday Calendar - All holidays in one place!" target="_blank">TheHolidayCalendar.com</a>.';
+			}
+			else
+			{
+				$content = $event[1];
 			}
 			
 			//$post->ID = -1;
