@@ -108,7 +108,7 @@ class thc_widget {
 					$events = thc_helper::add_remote_events($events, $countryIso, $dateFormat, $instance['unique_id']);
 				}
 				?>
-				output += '<div class="widget_calendar"><?php echo thc_calendar::draw_calendar(date('n'),date('Y'), $firstDayOfWeek == 0, $events, $dateFormat, $countryIso); ?></div>';
+				output += '<div class="widget_calendar"><?php echo thc_calendar::draw_calendar(date('n'),date('Y'), $firstDayOfWeek == 0, $events, $dateFormat, $countryIso, $enableReadMore); ?></div>';
 			<?php
 			}
 			?>

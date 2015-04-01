@@ -51,6 +51,9 @@ In the near future we plan to support other countries also.
 2. Calendar view is also supported
 
 == Changelog ==
+= 1.8.1 =
+* Read more link also available in calendar mode
+
 = 1.8 =
 * Number of holidays setting
 * Read more links on holiday posts

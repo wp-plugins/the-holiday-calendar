@@ -77,7 +77,7 @@ class thc_widget_form {
 			Mon</label>
 		</p>
 		<p>
-			<label for="<?php echo $this->get_field_id('numberOfHolidays'); ?>">Number of holidays</label>
+			<label for="<?php echo $this->get_field_id('numberOfHolidays'); ?>">Number of holidays (in list mode)</label>
 			<select class="widefat" id="<?php echo $this->get_field_id('numberOfHolidays'); ?>" name="<?php echo $this->get_field_name('numberOfHolidays'); ?>" >
 			<?php for($i = 3; $i <= 5; $i++) { ?>
 			  <option <?php selected( $numberOfHolidays, $i ); ?> value="<?php echo $i; ?>"><?php echo $i; ?></option>
