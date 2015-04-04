@@ -1,21 +1,18 @@
 <?php
 class thc_calendar {
 	/* draws a calendar */
-	function draw_calendar($month,$year,$sundayFirst, $events, $dateFormat, $countryIso, $enableReadMore){	
+	function draw_calendar($month,$year,$sundayFirst, $events, $dateFormat, $countryIso, $enableReadMore){		
 		$today = date('j');
 		/* draw table */
 		$calendar = '<table cellpadding="0" cellspacing="0" class="thc-calendar">';
-		$calendar.= '<caption>' . date('F') . ' ' . date('Y') . '</caption>';
+		$calendar.= '<caption>' . thc_translation_helper::get_month_name(date('n')) . ' ' . date('Y') . '</caption>';
 		
 		/* table headings */
-		$headings = '';	
-		if($sundayFirst)
+		$headings = thc_translation_helper::get_week_name_abbreviations();	
+		
+		if(!$sundayFirst)
 		{	
-			$headings = array('S','M','T','W','T','F','S');
-		}
-		else
-		{
-			$headings = array('M','T','W','T','F','S','S');
+			array_push($headings, array_shift($headings));
 		}
 		
 		$calendar.= '<thead><tr class="thc-calendar-row"><th class="thc-calendar-day-head" scope="col">'.implode('</th><th class="thc-calendar-day-head" scope="col">',$headings).'</th></tr></thead>';

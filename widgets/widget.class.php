@@ -153,6 +153,7 @@ class thc_widget {
 								$url = add_query_arg(array('dateFormat' => $dateFormat), $url);
 								$url = add_query_arg(array('country' => $countryIso), $url);
 								$url = add_query_arg(array('readmore' => $enableReadMore), $url);
+
 							?>
 							var valueToPush = [splitted[0], splitted[1], splitted[2], '<?php echo $url; ?>'.replace('replaceDate', splitted[2]), '0']; // http://wpsandbox.mva7.nl/events/?date=2015-04-01&dateFormat=4&country=AU or "var valueToPush = new Object();" which is the same
 							
