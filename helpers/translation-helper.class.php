@@ -74,7 +74,7 @@ class thc_translation_helper {
 	
 	function get_current_language()
 	{
-		$exploded = explode('_', get_bloginfo('language'));
+		$exploded = explode('-', get_bloginfo('language'));
 		return $exploded[0];
 	}
 }
