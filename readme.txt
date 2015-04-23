@@ -36,6 +36,7 @@ Brazil,
 France,
 Germany,
 India,
+Ireland,
 Japan,
 Mexico,
 Russia,
@@ -51,6 +52,9 @@ In the near future we plan to support other countries also.
 2. Calendar view is also supported
 
 == Changelog ==
+= 1.9.2 =
+* Added Irish holidays
+
 = 1.9.1 =
 * Minor fix in translations
 
