@@ -124,8 +124,10 @@ class the_holiday_calendar extends WP_Widget {
 	}
 	
 	function create_dummy_posts($posts)
-	{		
-		if(!request_helper::get_query_is_modified())
+	{	
+		$countryIso = http_get_helper::get_countryIso();		
+
+		if($countryIso == null || !request_helper::get_query_is_modified())
 		{
 			return $posts;
 		}
@@ -134,7 +136,6 @@ class the_holiday_calendar extends WP_Widget {
 		
 		$day = isset($wp_query->query_vars['date']) ? $wp_query->query_vars['date'] : date('Y-m-d');
 		$dateFormat = isset($wp_query->query_vars['dateFormat']) ? $wp_query->query_vars['dateFormat'] : 5;
-		$countryIso = isset($wp_query->query_vars['country']) ? $wp_query->query_vars['country'] : 'US';
 		$formattedDate = thc_helper::formatDate($day, $dateFormat);
 	
 		$posts = array_merge($posts, thc_helper::get_remote_events_as_posts($countryIso, $dateFormat, NULL, $day));

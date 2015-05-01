@@ -67,8 +67,12 @@ class thc_calendar {
 					$url = get_post_type_archive_link(thc_constants::POSTTYPE);
 					$url = add_query_arg(array('date' => $currentDate), $url);
 					$url = add_query_arg(array('dateFormat' => $dateFormat), $url);
-					$url = add_query_arg(array('country' => $countryIso), $url);					
-					$url = add_query_arg(array('readmore' => $enableReadMore), $url);
+					
+					if($countryIso != null)
+					{
+						$url = add_query_arg(array('country' => $countryIso), $url);					
+						$url = add_query_arg(array('readmore' => $enableReadMore), $url);
+					}
 					
 					$columnContent = '<a class="thc-highlight" title="' . $caption . '" href="' . $url . '">' . $list_day . '</a>';
 				}

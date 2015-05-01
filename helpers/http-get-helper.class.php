@@ -17,5 +17,14 @@ class http_get_helper {
 		
 		return $readmore;
 	}
+	
+	function get_countryIso()
+	{
+		global $wp_query;
+		
+		$countryIso = isset($wp_query->query_vars['country']) ? $wp_query->query_vars['country'] : null;
+		
+		return $countryIso;
+	}
 } 
 ?>
