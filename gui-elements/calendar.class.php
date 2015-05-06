@@ -104,17 +104,38 @@ class thc_calendar {
 		/* final row */
 		$calendar.= '</tr>';
 		
-		$prevMonth = $year . (str_pad($month - 1, 2 , '0', STR_PAD_LEFT));
-		$nextMonth = $year . (str_pad($month + 1, 2 , '0', STR_PAD_LEFT));	
+		$prevYear = $nextyear = $year;
+		
+		if($month != 1)
+		{
+			$prevMonth = $month - 1;
+		}
+		else
+		{
+			$prevMonth = 12;
+			$prevYear -= 1;
+		}
+		if($month != 12)
+		{
+			$nextMonth = $month + 1;
+		}
+		else
+		{
+			$nextMonth = 1;			
+			$nextyear += 1;
+		}
+		
+		$prevMonthString = $prevYear . (str_pad($prevMonth, 2 , '0', STR_PAD_LEFT));
+		$nextMonthString = $nextyear . (str_pad($nextMonth, 2 , '0', STR_PAD_LEFT));	
 
 		global $wp_query;
 		$currentUrl = add_query_arg( NULL, NULL );
 		
-		$prevUrl = add_query_arg(array('thc-month' => $prevMonth), $currentUrl);
-		$nextUrl = add_query_arg(array('thc-month' => $nextMonth), $currentUrl);
+		$prevUrl = add_query_arg(array('thc-month' => $prevMonthString), $currentUrl);
+		$nextUrl = add_query_arg(array('thc-month' => $nextMonthString), $currentUrl);
 		
-		$prevText = substr(thc_translation_helper::get_month_name($month - 1), 0, 3);
-		$nextText = substr(thc_translation_helper::get_month_name($month + 1), 0, 3);
+		$prevText = substr(thc_translation_helper::get_month_name($prevMonth), 0, 3);
+		$nextText = substr(thc_translation_helper::get_month_name($nextMonth), 0, 3);
 		
 		$calendar.= '<tr class="thc-calendar-navigation">';
 		$calendar.= '<td colspan="3"><a title="" href="' . $prevUrl . '">&lt; ' . $prevText . '</a></td><td>&nbsp;</td><td colspan="3"><a title="" href="' . $nextUrl . '">' . $nextText . ' &gt;</a></td>';

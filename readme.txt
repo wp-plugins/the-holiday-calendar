@@ -52,6 +52,9 @@ In the near future we plan to support other countries also.
 2. Calendar view is also supported
 
 == Changelog ==
+= 1.10 =
+* Month navigation in calendar mode
+
 = 1.9.2 =
 * Added Irish holidays
 
