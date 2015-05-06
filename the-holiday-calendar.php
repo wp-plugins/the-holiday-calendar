@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: The Holiday Calendar
-Version: 1.9.3
+Version: 1.10
 Plugin URI: http://www.theholidaycalendar.com
 Description: Shows the upcoming holidays.
 Author: Mva7
@@ -193,7 +193,8 @@ class the_holiday_calendar extends WP_Widget {
 	  $qvars[] = 'date';
 	  $qvars[] = 'dateFormat';
 	  $qvars[] = 'country';	  
-	  $qvars[] = 'readmore';
+	  $qvars[] = 'readmore';  
+	  $qvars[] = 'thc-month';
 	  
 	  return $qvars;
 	}

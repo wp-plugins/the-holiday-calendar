@@ -65,7 +65,7 @@ class thc_helper
 		return $posts;
 	}
 
-	function add_remote_events($events, $countryIso, $dateFormat, $widgetId = NULL, $date = NULL)
+	function add_remote_events($events, $countryIso, $dateFormat, $month, $year, $widgetId = NULL, $date = NULL)
 	{
 		$rows = session_helper::get_remote_events();
 		

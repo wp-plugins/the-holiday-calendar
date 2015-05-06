@@ -5,7 +5,7 @@ class thc_calendar {
 		$today = date('j');
 		/* draw table */
 		$calendar = '<table cellpadding="0" cellspacing="0" class="thc-calendar">';
-		$calendar.= '<caption>' . thc_translation_helper::get_month_name(date('n')) . ' ' . date('Y') . '</caption>';
+		$calendar.= '<caption>' . thc_translation_helper::get_month_name($month) . ' ' . $year . '</caption>';
 		
 		/* table headings */
 		$headings = thc_translation_helper::get_week_name_abbreviations();	
@@ -102,6 +102,22 @@ class thc_calendar {
 		endif;
 
 		/* final row */
+		$calendar.= '</tr>';
+		
+		$prevMonth = $year . (str_pad($month - 1, 2 , '0', STR_PAD_LEFT));
+		$nextMonth = $year . (str_pad($month + 1, 2 , '0', STR_PAD_LEFT));	
+
+		global $wp_query;
+		$currentUrl = add_query_arg( NULL, NULL );
+		
+		$prevUrl = add_query_arg(array('thc-month' => $prevMonth), $currentUrl);
+		$nextUrl = add_query_arg(array('thc-month' => $nextMonth), $currentUrl);
+		
+		$prevText = substr(thc_translation_helper::get_month_name($month - 1), 0, 3);
+		$nextText = substr(thc_translation_helper::get_month_name($month + 1), 0, 3);
+		
+		$calendar.= '<tr class="thc-calendar-navigation">';
+		$calendar.= '<td colspan="3"><a title="" href="' . $prevUrl . '">&lt; ' . $prevText . '</a></td><td>&nbsp;</td><td colspan="3"><a title="" href="' . $nextUrl . '">' . $nextText . ' &gt;</a></td>';
 		$calendar.= '</tr>';
 
 		/* end the table */
