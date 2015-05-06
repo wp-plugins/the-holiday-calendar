@@ -55,6 +55,9 @@ In the near future we plan to support other countries also.
 = 1.10 =
 * Month navigation in calendar mode
 
+= 1.9.3 =
+* Holidays still showed up after being disabled. Fixed now.
+
 = 1.9.2 =
 * Added Irish holidays
 
