@@ -6,7 +6,7 @@ class thc_helper
 		$showReadMore = http_get_helper::get_readmore();
 		
 		global $wp_query, $wp;
-		$events = self::add_remote_events(array(), $countryIso, $dateFormat, date('m'), date('Y'), $widgetId, $date);
+		$events = self::add_remote_events(array(), $countryIso, $dateFormat, $widgetId, $date);
 		
 		$posts = array();
 		
@@ -65,13 +65,13 @@ class thc_helper
 		return $posts;
 	}
 
-	function add_remote_events($events, $countryIso, $dateFormat, $month, $year, $widgetId = NULL, $date = NULL)
+	function add_remote_events($events, $countryIso, $dateFormat, $widgetId = NULL, $date = NULL)
 	{
 		$rows = session_helper::get_remote_events();
 		
 		if($rows == null) {
 			
-			$url = 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=' . thc_constants::PLUGIN_VERSION . '&amountOfHolidays=100&fromDate=2000-01-01&pluginId=' . (!is_null($widgetId) ? $widgetId : '00000000-0000-0000-0000-000000000000') . '&url=' . site_url() . '&countryIso=' . $countryIso . '&dateFormat=' . $dateFormat;				
+			$url = 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=' . thc_constants::PLUGIN_VERSION . '&amountOfHolidays=1000&fromDate=2000-01-01&pluginId=' . (!is_null($widgetId) ? $widgetId : '00000000-0000-0000-0000-000000000000') . '&url=' . site_url() . '&countryIso=' . $countryIso . '&dateFormat=' . $dateFormat;				
 			$result = wp_remote_get($url, array('timeout' => 3));
 			
 			if(is_wp_error( $result ))
