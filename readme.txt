@@ -52,6 +52,10 @@ In the near future we plan to support other countries also.
 2. Calendar view is also supported
 
 == Changelog ==
+= 1.10.1 =
+* Month navigation fix, some months were abbreviated to two characters instead of three
+* Attempt to support older PHP versions
+
 = 1.10 =
 * Month navigation in calendar mode
 
