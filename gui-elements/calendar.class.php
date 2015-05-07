@@ -1,7 +1,9 @@
 <?php
 class thc_calendar {
 	/* draws a calendar */
-	function draw_calendar($month,$year,$sundayFirst, $events, $dateFormat, $countryIso, $enableReadMore){		
+	function draw_calendar($month,$year,$sundayFirst, $events, $dateFormat, $countryIso, $enableReadMore){
+		global $wp_query;
+		
 		$today = date('j');
 		/* draw table */
 		$calendar = '<table cellpadding="0" cellspacing="0" class="thc-calendar">';
@@ -74,6 +76,11 @@ class thc_calendar {
 						$url = add_query_arg(array('readmore' => $enableReadMore), $url);
 					}
 					
+					if(isset($wp_query->query_vars['thc-month']))
+					{
+						$url = add_query_arg(array('thc-month' => $wp_query->query_vars['thc-month']), $url);
+					}
+					
 					$columnContent = '<a class="thc-highlight" title="' . $caption . '" href="' . $url . '">' . $list_day . '</a>';
 				}
 				else
@@ -95,9 +102,10 @@ class thc_calendar {
 		endfor;
 
 		/* finish the rest of the days in the week */
-		if($days_in_this_week < 8):
+		
+		if($days_in_this_week < 8 && $days_in_this_week > 1):
 			for($x = 1; $x <= (8 - $days_in_this_week); $x++):
-				$calendar.= '<td class="thc-calendar-day-np"> </td>';
+				$calendar.= '<td class="thc-calendar-day-np">&nbsp;</td>';
 			endfor;
 		endif;
 
@@ -127,8 +135,7 @@ class thc_calendar {
 		
 		$prevMonthString = $prevYear . (str_pad($prevMonth, 2 , '0', STR_PAD_LEFT));
 		$nextMonthString = $nextyear . (str_pad($nextMonth, 2 , '0', STR_PAD_LEFT));	
-
-		global $wp_query;
+		
 		$currentUrl = add_query_arg( NULL, NULL );
 		
 		$prevUrl = add_query_arg(array('thc-month' => $prevMonthString), $currentUrl);

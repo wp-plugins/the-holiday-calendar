@@ -8,6 +8,11 @@
 	margin-bottom: 10px;
 }
 
+.thc-widget-content .thc-calendar-navigation a {
+	background-color: transparent;
+	color: inherit;
+}
+
 .thc-widget-content .thc-highlight {
 	font-weight: bold;
 	text-decoration: underline;
