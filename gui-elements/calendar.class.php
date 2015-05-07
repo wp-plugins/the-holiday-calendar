@@ -141,8 +141,8 @@ class thc_calendar {
 		$prevUrl = add_query_arg(array('thc-month' => $prevMonthString), $currentUrl);
 		$nextUrl = add_query_arg(array('thc-month' => $nextMonthString), $currentUrl);
 		
-		$prevText = substr(thc_translation_helper::get_month_name($prevMonth), 0, 3);
-		$nextText = substr(thc_translation_helper::get_month_name($nextMonth), 0, 3);
+		$prevText = mb_substr(thc_translation_helper::get_month_name($prevMonth), 0, 3);
+		$nextText = mb_substr(thc_translation_helper::get_month_name($nextMonth), 0, 3);
 		
 		$calendar.= '<tr class="thc-calendar-navigation">';
 		$calendar.= '<td colspan="3"><a title="" href="' . $prevUrl . '">&lt; ' . $prevText . '</a></td><td>&nbsp;</td><td colspan="3"><a title="" href="' . $nextUrl . '">' . $nextText . ' &gt;</a></td>';

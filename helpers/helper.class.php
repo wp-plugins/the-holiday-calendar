@@ -103,7 +103,10 @@ class thc_helper
 	
 	function formatDate($dateToFormat, $format)
 	{
-		$dateToFormat = date_create_from_format('Y-m-d', $dateToFormat);
+		list($year, $month, $day) = sscanf($dateToFormat, '%04d-%02d-%02d');
+		$dateToFormat = new DateTime("$year-$month-$day");
+		
+		//$dateToFormat = date_create_from_format('Y-m-d', $dateToFormat);
 		/*
 			0: dd-mm-yy
 			1: dd.mm.yy
