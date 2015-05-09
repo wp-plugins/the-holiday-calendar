@@ -3,7 +3,7 @@ Contributors: mva7
 Tags: calendar, calendar localization, calendar widget, calendario, calendars, Calender, event, event calendar, event list, event manager, event page, event widget, events, events calendar, free calendar, holiday, holidays, holiday calendar, upcoming holidays, Kalender, online calendar, Organizer, upcoming events, upcoming events widget
 Requires at least: 3.3
 Tested up to: 4.2.2
-Stable tag: 1.10.1
+Stable tag: 1.10.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
