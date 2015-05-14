@@ -17,6 +17,7 @@ require_once('widgets/widget.class.php');
 require_once('widgets/widget-manager.class.php');
 require_once('posts/post-manager.class.php');
 require_once('admin/post-form.class.php');
+require_once('admin/settings.class.php');
 require_once('helpers/session-helper.class.php');
 require_once('helpers/request-helper.class.php');
 require_once('helpers/translation-helper.class.php');
@@ -54,6 +55,9 @@ class the_holiday_calendar extends WP_Widget {
 		
 		if (!session_id())
 			session_start();
+			
+		if( is_admin() )
+			$thc_settings = new thc_settings();
 	}
 	
 	function get_excerpt($excerpt) {
