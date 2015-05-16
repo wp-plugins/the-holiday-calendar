@@ -173,6 +173,15 @@ class the_holiday_calendar extends WP_Widget {
 				{
 					$title = $title . ' (' . self::get_requested_date() . ')';		
 				}
+				else if ( is_single() )
+				{
+					global $post;
+					
+					$event_date = get_post_meta( $post->ID, 'eventDate', true );
+					$event_date = thc_helper::formatDate($event_date);
+					
+					$title .= ' (' . $event_date . ')';
+				}
 			}
 		}
 		
