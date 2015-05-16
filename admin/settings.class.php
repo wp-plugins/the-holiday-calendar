@@ -18,8 +18,8 @@ class thc_settings {
      * Start up
      */
     public function __construct()
-    {	
-        add_action( 'admin_menu', array( $this, 'add_plugin_page' ) );
+    {		
+		add_action( 'admin_menu', array( $this, 'add_plugin_page' ) );
         add_action( 'admin_init', array( $this, 'thc_settings_init' ) );		
     }
 
@@ -44,7 +44,7 @@ class thc_settings {
     public function create_admin_page()
     {
         // Set class property
-        $this->options = get_option( 'thc_settings' );
+        $this->options = get_option( thc_settings_helper::OPTION_NAME );
         ?>
         <div class="wrap">
             <h2>The Holiday Calendar Settings</h2>           
@@ -67,7 +67,7 @@ class thc_settings {
     {        
         register_setting(
             self::SETTINGS_GROUP_NAME, // Option group
-            'thc_settings', // Option name
+            thc_settings_helper::OPTION_NAME, // Option name
             array( $this, 'sanitize' ) // Sanitize
         );
 
@@ -79,7 +79,7 @@ class thc_settings {
         );  
 
         add_settings_field(
-            'thc_date_format', // ID
+            thc_settings_helper::DATE_FORMAT_KEY, // ID
             'Date format', // Title 
             array( $this, 'date_format_render' ), // Callback
             self::SETTINGS_PAGE_SLUG, // Page
@@ -87,7 +87,7 @@ class thc_settings {
         );      
 
         add_settings_field(
-            'thc_hide_read_more', 
+            thc_settings_helper::HIDE_READMORE_KEY, 
             'Hide read more link', 
             array( $this, 'read_more_render' ), 
             self::SETTINGS_PAGE_SLUG, 
@@ -103,11 +103,11 @@ class thc_settings {
     public function sanitize( $input )
     {
         $new_input = array();
-        if( isset( $input['thc_date_format'] ) )
-            $new_input['thc_date_format'] = sanitize_text_field( $input['thc_date_format'] );
+        if( isset( $input[thc_settings_helper::DATE_FORMAT_KEY] ) )
+            $new_input[thc_settings_helper::DATE_FORMAT_KEY] = sanitize_text_field( $input[thc_settings_helper::DATE_FORMAT_KEY] );
 
-        if( isset( $input['thc_hide_read_more'] ) )
-            $new_input['thc_hide_read_more'] = sanitize_text_field( $input['thc_hide_read_more'] );
+        if( isset( $input[thc_settings_helper::HIDE_READMORE_KEY] ) )
+            $new_input[thc_settings_helper::HIDE_READMORE_KEY] = sanitize_text_field( $input[thc_settings_helper::HIDE_READMORE_KEY] );
 
         return $new_input;
     }
@@ -125,12 +125,12 @@ class thc_settings {
      */
     public function date_format_render()
     {	
-		$dateFormats = array('dd-mm-yy' => '0', 'dd.mm.yy' => '1', 'dd.mm.yyyy' => '2', 'dd/mm/yy' => '3', 'dd/mm/yyyy' => '4', 'mm/dd/yyyy' => '5', 'yy/mm/dd' => '6', 'yyyy? m? d?' => '7');
+		$dateFormats = array('dd-mm-yy' => '0', 'dd.mm.yy' => '1', 'dd.mm.yyyy' => '2', 'dd/mm/yy' => '3', 'dd/mm/yyyy' => '4', 'mm/dd/yyyy' => '5', 'yy/mm/dd' => '6', 'yyyy년 m월 d일' => '7');
 		
         ?>
-			<select name='thc_settings[thc_date_format]'>
+			<select name='thc_settings[<?php echo thc_settings_helper::DATE_FORMAT_KEY; ?>]'>
 				<?php foreach($dateFormats as $dateFormat => $code) { ?>
-				  <option <?php selected( $this->options['thc_date_format'], $code ); ?> value="<?php echo $code; ?>"><?php echo $dateFormat; ?></option>
+				  <option <?php selected( $this->options[thc_settings_helper::DATE_FORMAT_KEY], $code ); ?> value="<?php echo $code; ?>"><?php echo $dateFormat; ?></option>
 				<?php } ?>
 			</select>
 		<?php
@@ -142,7 +142,7 @@ class thc_settings {
     public function read_more_render()
     {
         ?>
-			<input type='checkbox' name='thc_settings[thc_hide_read_more]' <?php checked( $this->options['thc_hide_read_more'], 1 ); ?> value='1'>
+			<input type='checkbox' name='thc_settings[<?php echo thc_settings_helper::HIDE_READMORE_KEY; ?>]' <?php checked( $this->options[thc_settings_helper::HIDE_READMORE_KEY], 1 ); ?> value='1'>
 		<?php
     }
 }

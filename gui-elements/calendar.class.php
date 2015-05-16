@@ -1,7 +1,7 @@
 <?php
 class thc_calendar {
 	/* draws a calendar */
-	function draw_calendar($month,$year,$sundayFirst, $events, $dateFormat, $countryIso, $enableReadMore){
+	function draw_calendar($month,$year,$sundayFirst, $events, $countryIso){
 		global $wp_query;
 		
 		$today = $month == date('m') && $year == date('Y') ? date('j') : -1;
@@ -68,12 +68,10 @@ class thc_calendar {
 					
 					$url = get_post_type_archive_link(thc_constants::POSTTYPE);
 					$url = add_query_arg(array('date' => $currentDate), $url);
-					$url = add_query_arg(array('dateFormat' => $dateFormat), $url);
 					
 					if($countryIso != null)
 					{
-						$url = add_query_arg(array('country' => $countryIso), $url);					
-						$url = add_query_arg(array('readmore' => $enableReadMore), $url);
+						$url = add_query_arg(array('country' => $countryIso), $url);
 					}
 					
 					if(isset($wp_query->query_vars['thc-month']))

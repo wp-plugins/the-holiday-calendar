@@ -23,11 +23,8 @@ class thc_widget {
 		}
 
 		$includeHolidays = !isset($instance['includeThcEvents2']) || $instance['includeThcEvents2'] == '1';
-		$dateFormat = isset($instance['dateFormat']) ? $instance['dateFormat'] : '5';
 		$countryIso = $includeHolidays ? (isset($instance['country2']) ? $instance['country2'] : 'US') : null;
 		$numberOfHolidays = isset($instance['numberOfHolidays']) ? $instance['numberOfHolidays'] : '3';
-		//if firstDayOfWeek is set then this plugin was not new
-		$enableReadMore = isset($instance['enableReadMore']) ? $instance['enableReadMore'] : (isset($instance['firstDayOfWeek']) ? '0' : '1');
 
 		global $wp_query;
 		$yearToShow = $displayMode == 1 && isset($wp_query->query_vars['thc-month']) ? substr($wp_query->query_vars['thc-month'], 0, 4) : date('Y');	
@@ -60,7 +57,7 @@ class thc_widget {
 					$query->the_post();
 					
 					$eventDate = get_post_meta( $query->post->ID, 'eventDate', true );								
-					$formattedDate = thc_helper::formatDate($eventDate, $dateFormat);
+					$formattedDate = thc_helper::formatDate($eventDate);
 					$title = get_the_title();
 					$url = '';
 					
@@ -110,11 +107,11 @@ class thc_widget {
 				//http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=1.3&amountOfHolidays=3&fromDate=2014-12-3&pluginId=3b6bfa54-8bd2-4a5c-a328-9f29d6fb5e00&url=http://wpsandbox.mva7.nl&countryIso=DE&dateFormat=2
 				if($includeHolidays)
 				{
-					$events = thc_helper::add_remote_events($events, $countryIso, $dateFormat, $instance['unique_id']);
+					$events = thc_helper::add_remote_events($events, $countryIso, $instance['unique_id']);
 				}
 
 				?>
-				output += '<div class="widget_calendar"><?php echo thc_calendar::draw_calendar($monthToShow,$yearToShow, $firstDayOfWeek == 0, $events, $dateFormat, $countryIso, $enableReadMore); ?></div>';
+				output += '<div class="widget_calendar"><?php echo thc_calendar::draw_calendar($monthToShow,$yearToShow, $firstDayOfWeek == 0, $events, $countryIso); ?></div>';
 			<?php
 			}
 			?>
@@ -136,7 +133,7 @@ class thc_widget {
 			var unique_id = '<?php echo $instance['unique_id']; ?>';
 			var site_url = '<?php echo  site_url(); ?>';
 			var countryIso = '<?php echo $countryIso; ?>';
-			var dateFormat = '<?php echo $dateFormat; ?>';
+			var dateFormat = '<?php echo thc_settings_helper::get_date_format(); ?>';
 			var firstDayOfWeek = '<?php echo $firstDayOfWeek; ?>';
 			
 
@@ -156,9 +153,7 @@ class thc_widget {
 							<?php
 								$url = get_post_type_archive_link(thc_constants::POSTTYPE);
 								$url = add_query_arg(array('date' => 'replaceDate'), $url);
-								$url = add_query_arg(array('dateFormat' => $dateFormat), $url);
 								$url = add_query_arg(array('country' => $countryIso), $url);
-								$url = add_query_arg(array('readmore' => $enableReadMore), $url);
 
 							?>
 							var valueToPush = [splitted[0], splitted[1], splitted[2], '<?php echo $url; ?>'.replace('replaceDate', splitted[2]), '0']; // http://wpsandbox.mva7.nl/events/?date=2015-04-01&dateFormat=4&country=AU or "var valueToPush = new Object();" which is the same

@@ -1,12 +1,12 @@
 <?php
 class thc_helper
 {
-	function get_remote_events_as_posts($countryIso, $dateFormat, $widgetId = NULL, $date = NULL)
+	function get_remote_events_as_posts($countryIso, $widgetId = NULL, $date = NULL)
 	{
-		$showReadMore = http_get_helper::get_readmore();
+		$hide_readmore = thc_settings_helper::get_hide_readmore();
 		
 		global $wp_query, $wp;
-		$events = self::add_remote_events(array(), $countryIso, $dateFormat, $widgetId, $date);
+		$events = self::add_remote_events(array(), $countryIso, $widgetId, $date);
 		
 		$posts = array();
 		
@@ -14,7 +14,7 @@ class thc_helper
 		{
 			$post = new stdClass();			
 			
-			if($showReadMore == '1')
+			if($hide_readmore == 0)
 			{
 				$content = '<br /><br />Read more about <a href="' . $event[3] . '" target="_blank" title="Read more about ' . $event[1] . ' on TheHolidayCalendar.com">' . $event[1] . '</a> on <a href="http://www.theholidaycalendar.com/" title="The Holiday Calendar - All holidays in one place!" target="_blank">TheHolidayCalendar.com</a>.';
 			}
@@ -65,13 +65,13 @@ class thc_helper
 		return $posts;
 	}
 
-	function add_remote_events($events, $countryIso, $dateFormat, $widgetId = NULL, $date = NULL)
+	function add_remote_events($events, $countryIso, $widgetId = NULL, $date = NULL)
 	{
 		$rows = session_helper::get_remote_events();
 		
 		if($rows == null) {
 			
-			$url = 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=' . thc_constants::PLUGIN_VERSION . '&amountOfHolidays=1000&fromDate=2000-01-01&pluginId=' . (!is_null($widgetId) ? $widgetId : '00000000-0000-0000-0000-000000000000') . '&url=' . site_url() . '&countryIso=' . $countryIso . '&dateFormat=' . $dateFormat;				
+			$url = 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=' . thc_constants::PLUGIN_VERSION . '&amountOfHolidays=1000&fromDate=2000-01-01&pluginId=' . (!is_null($widgetId) ? $widgetId : '00000000-0000-0000-0000-000000000000') . '&url=' . site_url() . '&countryIso=' . $countryIso . '&dateFormat=' . thc_settings_helper::get_date_format();				
 			$result = wp_remote_get($url, array('timeout' => 3));
 			
 			if(is_wp_error( $result ))
@@ -101,7 +101,7 @@ class thc_helper
 		return $events;
 	}
 	
-	function formatDate($dateToFormat, $format)
+	function formatDate($dateToFormat)
 	{
 		list($year, $month, $day) = sscanf($dateToFormat, '%04d-%02d-%02d');
 		$dateToFormat = new DateTime("$year-$month-$day");
@@ -115,10 +115,12 @@ class thc_helper
 			4: dd/mm/yyyy
 			5: mm/dd/yyyy (US)
 			6: yy/mm/dd
-			7: yyyy? m? d?
+			7: yyyy년 m월 d일
 		*/
-
-		switch ($format)
+		
+		$dateFormat = thc_settings_helper::get_date_format();
+		
+		switch ($dateFormat)
 		{
 			case 0:
 				return date_format($dateToFormat,"d-m-y");//dateToFormat.ToString("dd-MM-yy", CultureInfo.InvariantCulture);
@@ -135,7 +137,7 @@ class thc_helper
 			case 6:
 				return date_format($dateToFormat,"y/m/d");//return dateToFormat.ToString("yy/MM/dd", CultureInfo.InvariantCulture);
 			case 7:
-				return date_format($dateToFormat,"Y? m? d?");//return dateToFormat.ToString("yyyy? M? d?", CultureInfo.InvariantCulture);
+				return date_format($dateToFormat,"Y년 m월 d일");//return dateToFormat.ToString("yyyy년 m월 d일", CultureInfo.InvariantCulture);
 		}
 
 		throw new InvalidOperationException("Date format not supported");

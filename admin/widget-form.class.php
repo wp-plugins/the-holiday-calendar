@@ -64,7 +64,7 @@ class thc_widget_form {
 			<input class="checkbox" type="checkbox" <?php checked($showPoweredBy, '1'); ?> id="<?php echo $this->get_field_id('show_powered_by'); ?>" name="<?php echo $this->get_field_name('show_powered_by'); ?>" value="1" /> 
 			<label for="<?php echo $this->get_field_id('show_powered_by'); ?>">Enable "Powered by The Holiday Calendar". Thank you!!!</label>
 		</p>
-		<p>Additional settings can be found on the plugin's settings page.</p>
+		<p style="font-style: italic;">Additional settings can be found on the plugin's settings page.</p>
 		<?php
 	}
 }

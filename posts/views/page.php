@@ -1,9 +1,8 @@
 <?php 
 global $wp_query;
 $day = isset($wp_query->query_vars['date']) ? $wp_query->query_vars['date'] : date('Y-m-d');
-$dateFormat = isset($wp_query->query_vars['dateFormat']) ? $wp_query->query_vars['dateFormat'] : 5;
 $countryIso = isset($wp_query->query_vars['country']) ? $wp_query->query_vars['country'] : 'US';
-$formattedDate = thc_helper::formatDate($day, $dateFormat);
+$formattedDate = thc_helper::formatDate($day);
 ?>	
 <div id="mva7-thc-main">
 	<div id="mva7-thc-events">
@@ -13,7 +12,7 @@ $formattedDate = thc_helper::formatDate($day, $dateFormat);
 		$events[] = array($formattedDate, get_the_title(), $day, get_the_content());	
 	endwhile;
 	
-	$events = thc_helper::add_remote_events($events, $countryIso, $dateFormat, NULL, $day);
+	$events = thc_helper::add_remote_events($events, $countryIso, NULL, $day);
 		
 	if(!empty($events))
 	{

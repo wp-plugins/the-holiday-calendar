@@ -21,6 +21,9 @@ require_once('admin/settings.class.php');
 require_once('helpers/session-helper.class.php');
 require_once('helpers/request-helper.class.php');
 require_once('helpers/translation-helper.class.php');
+require_once('helpers/update-helper.class.php');
+require_once('helpers/string-helper.class.php');
+require_once('helpers/settings-helper.class.php');
 
 add_action( 'widgets_init', create_function('', 'return register_widget("the_holiday_calendar");'));
 add_action( 'init', array( 'the_holiday_calendar', 'create_post_type' ) );
@@ -48,6 +51,8 @@ class the_holiday_calendar extends WP_Widget {
 	// constructor
 	function the_holiday_calendar() {
 		parent::WP_Widget(false, $name = __('The Holiday Calendar', 'wp_widget_plugin') );		
+		
+		thc_update_helper::migrate_widget_settings();
 		
 		if (!is_admin()) {
 			wp_enqueue_script('jquery');
@@ -139,10 +144,10 @@ class the_holiday_calendar extends WP_Widget {
 		global $wp_query;		
 		
 		$day = isset($wp_query->query_vars['date']) ? $wp_query->query_vars['date'] : date('Y-m-d');
-		$dateFormat = isset($wp_query->query_vars['dateFormat']) ? $wp_query->query_vars['dateFormat'] : 5;
-		$formattedDate = thc_helper::formatDate($day, $dateFormat);
+		
+		$formattedDate = thc_helper::formatDate($day);
 	
-		$posts = array_merge($posts, thc_helper::get_remote_events_as_posts($countryIso, $dateFormat, NULL, $day));
+		$posts = array_merge($posts, thc_helper::get_remote_events_as_posts($countryIso, NULL, $day));
 		
 		return $posts;
 	}
@@ -186,18 +191,15 @@ class the_holiday_calendar extends WP_Widget {
 	function get_requested_date() {
 		global $wp_query;
 
-		$day = isset($wp_query->query_vars['date']) ? $wp_query->query_vars['date'] : date('Y-m-d');
-		$dateFormat = isset($wp_query->query_vars['dateFormat']) ? $wp_query->query_vars['dateFormat'] : 5;
+		$day = isset($wp_query->query_vars['date']) ? $wp_query->query_vars['date'] : date('Y-m-d');		
 		
-		return thc_helper::formatDate($day, $dateFormat);
+		return thc_helper::formatDate($day);
 	}
 	
 	function add_queryvars( $qvars )
 	{
 	  $qvars[] = 'date';
-	  $qvars[] = 'dateFormat';
-	  $qvars[] = 'country';	  
-	  $qvars[] = 'readmore';  
+	  $qvars[] = 'country';
 	  $qvars[] = 'thc-month';
 	  
 	  return $qvars;

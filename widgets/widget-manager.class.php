@@ -7,7 +7,6 @@ class thc_widget_manager {
 		$instance['title'] = strip_tags($new_instance['title']);
 		$instance['show_powered_by'] = $new_instance['show_powered_by'];
 		$instance['country2'] = $new_instance['country2'];
-		$instance['dateFormat'] = $new_instance['dateFormat'];
 		
 		if(isset($new_instance['includeThcEvents2']))
 		{
@@ -26,7 +25,6 @@ class thc_widget_manager {
 		$instance['displayMode'] = $new_instance['displayMode'];
 		$instance['firstDayOfWeek'] = $new_instance['firstDayOfWeek'];
 		$instance['numberOfHolidays'] = $new_instance['numberOfHolidays'];
-		$instance['enableReadMore'] = !isset($new_instance['disableReadMore']) ? '1' : '0';
 		
 		session_helper::clear_session();
 		

@@ -3,6 +3,6 @@ class thc_constants
 {
 	const PLUGIN_VERSION = '1.10.2';
 	const POSTTYPE = 'thc-events';
-	const EVENTS_SLUG = 'events';
+	const EVENTS_SLUG = 'events';	
 }
 ?>
