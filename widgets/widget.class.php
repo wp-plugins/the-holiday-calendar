@@ -58,7 +58,11 @@ class thc_widget {
 					
 					$eventDate = get_post_meta( $query->post->ID, 'eventDate', true );								
 					$formattedDate = thc_helper::formatDate($eventDate);
+					
+					request_helper::set_surpress_title_filter(true);					
 					$title = get_the_title();
+					request_helper::set_surpress_title_filter(false);
+					
 					$url = '';
 					
 					if(get_the_ID() > 0)

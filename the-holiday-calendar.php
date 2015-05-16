@@ -173,7 +173,7 @@ class the_holiday_calendar extends WP_Widget {
 				{
 					$title = $title . ' (' . self::get_requested_date() . ')';		
 				}
-				else if ( is_single() )
+				else if ( is_single() && !request_helper::get_surpress_title_filter())
 				{
 					global $post;
 					
