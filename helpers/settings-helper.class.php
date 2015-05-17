@@ -17,14 +17,14 @@ class thc_settings_helper
 	{
 		$option = get_option( self::OPTION_NAME );
 		
-		return $option[self::HIDE_READMORE_KEY];
+		return isset($option[self::HIDE_READMORE_KEY]) ? $option[self::HIDE_READMORE_KEY] : 0;
 	}
 	
 	function get_show_date_in_title()
 	{
 		$option = get_option( self::OPTION_NAME );
 		
-		return $option[self::SHOW_DATE_IN_TITLE_KEY];
+		return isset($option[self::SHOW_DATE_IN_TITLE_KEY]) ? $option[self::SHOW_DATE_IN_TITLE_KEY] : 0;
 	}
 }
 ?>

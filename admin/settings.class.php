@@ -136,7 +136,7 @@ class thc_settings {
      */
     public function date_format_render()
     {	
-		$dateFormats = array('dd-mm-yy' => '0', 'dd.mm.yy' => '1', 'dd.mm.yyyy' => '2', 'dd/mm/yy' => '3', 'dd/mm/yyyy' => '4', 'mm/dd/yyyy' => '5', 'yy/mm/dd' => '6', 'yyyy? m? d?' => '7');
+		$dateFormats = array('dd-mm-yy' => '0', 'dd.mm.yy' => '1', 'dd.mm.yyyy' => '2', 'dd/mm/yy' => '3', 'dd/mm/yyyy' => '4', 'm/d/yyyy' => '5', 'yy/mm/dd' => '6', 'yyyy? m? d?' => '7');
 		
         ?>
 			<select name='thc_settings[<?php echo thc_settings_helper::DATE_FORMAT_KEY; ?>]'>
