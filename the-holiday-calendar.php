@@ -32,7 +32,7 @@ add_action( 'add_meta_boxes', array( 'the_holiday_calendar', 'add_meta_box' ) );
 add_action( 'save_post', array( 'the_holiday_calendar', 'save' ) );
 add_action( 'wp_enqueue_scripts', array( 'the_holiday_calendar', 'load_css' ) );
 add_filter( 'body_class', array( 'the_holiday_calendar', 'add_body_classes') );
-add_filter( 'the_title', array( 'the_holiday_calendar', 'override_title') );
+add_filter( 'the_title', array( 'the_holiday_calendar', 'override_title'), 10, 2 );
 //add_action( 'template_redirect', array( 'the_holiday_calendar', 'override_template') );
 //add_filter( 'the_content', array( 'the_holiday_calendar', 'override_content') );
 add_filter( 'wp_title', array( 'the_holiday_calendar', 'override_page_title'), 10, 2 );
@@ -173,7 +173,8 @@ class the_holiday_calendar extends WP_Widget {
 		}
 	}
 	
-	function override_title($title) {
+	function override_title($title, $id) {	
+		global $post;
 		if(get_post_type() == thc_constants::POSTTYPE)
 		{
 			if(is_admin())
@@ -185,9 +186,8 @@ class the_holiday_calendar extends WP_Widget {
 				{
 					$title = $title . ' (' . self::get_requested_date() . ')';		
 				}
-				else if (thc_settings_helper::get_show_date_in_title() == 1 && is_single() && !request_helper::get_surpress_title_filter())
+				else if (thc_settings_helper::get_show_date_in_title() == 1 && is_single() && !request_helper::get_surpress_title_filter() && $id == get_the_ID())
 				{
-					global $post;
 					
 					$event_date = get_post_meta( $post->ID, 'eventDate', true );
 					$event_date = thc_helper::formatDate($event_date);
