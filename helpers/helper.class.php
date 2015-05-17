@@ -25,7 +25,7 @@ class thc_helper
 
 				request_helper::set_read_more_texts($read_more_texts);
 				
-				$post->post_excerpt = thc_constants::EXCERPT_MARKER_PREFIX . $read_more_text_id;
+				$post->post_excerpt = $content . '<!--' . thc_constants::EXCERPT_MARKER_PREFIX . $read_more_text_id . '-->';
 			}
 			else
 			{
