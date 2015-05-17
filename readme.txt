@@ -52,6 +52,9 @@ In the near future we plan to support other countries also.
 2. Calendar view is also supported
 
 == Changelog ==
+= 1.11.1 =
+* Some sites showed something like thcexcerpt555911463397c as event excerpt. Fixed now.
+
 = 1.11 =
 * Added settings screen
 * Current widget properties are automatically migrated to settings
