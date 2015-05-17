@@ -41,8 +41,8 @@ add_filter('the_posts', array( 'the_holiday_calendar', 'create_dummy_posts'));
 add_filter( 'manage_edit-' . thc_constants::POSTTYPE . '_columns' , array( 'the_holiday_calendar', 'add_date_column' ));
 add_action( 'manage_' . thc_constants::POSTTYPE . '_posts_custom_column', array( 'the_holiday_calendar', 'fill_date_column' ), 10, 2 );
 add_filter( 'manage_edit-' . thc_constants::POSTTYPE . '_sortable_columns', array( 'the_holiday_calendar', 'make_sortable_date_column' ) );
-remove_all_filters('get_the_excerpt');
-add_filter('get_the_excerpt', array( 'the_holiday_calendar', 'get_excerpt' ));
+add_filter( 'get_the_excerpt', array( 'the_holiday_calendar', 'get_excerpt' ), 99);
+add_filter( 'the_excerpt', array( 'the_holiday_calendar', 'get_excerpt' ), 99);
 
 class the_holiday_calendar extends WP_Widget {
 	
@@ -68,7 +68,19 @@ class the_holiday_calendar extends WP_Widget {
 	function get_excerpt($excerpt) {
 		if(!request_helper::get_query_was_modified())
 		{
-			return wp_trim_excerpt($excerpt);
+			return $excerpt;
+		}
+		
+		global $post;
+		if(thc_string_helper::contains($post->post_excerpt, thc_constants::EXCERPT_MARKER_PREFIX))
+		{
+			$startpos = strpos($post->post_excerpt, thc_constants::EXCERPT_MARKER_PREFIX) + strlen(thc_constants::EXCERPT_MARKER_PREFIX);
+		
+			$read_more_text_id = substr($post->post_excerpt, $startpos, 13);
+		
+			$read_more_texts = request_helper::get_read_more_texts();
+			
+			$excerpt = $read_more_texts[$read_more_text_id];
 		}
 		
 		return $excerpt;

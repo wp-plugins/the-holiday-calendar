@@ -15,12 +15,22 @@ class thc_helper
 			$post = new stdClass();			
 			
 			if($hide_readmore == 0)
-			{
-				$content = '<br /><br />Read more about <a href="' . $event[3] . '" target="_blank" title="Read more about ' . $event[1] . ' on TheHolidayCalendar.com">' . $event[1] . '</a> on <a href="http://www.theholidaycalendar.com/" title="The Holiday Calendar - All holidays in one place!" target="_blank">TheHolidayCalendar.com</a>.';
+			{				
+				$content = self::get_read_more_text($event);
+				
+				$read_more_text_id = uniqid();
+				
+				$read_more_texts = array();				
+				$read_more_texts[$read_more_text_id] = $content;	
+
+				request_helper::set_read_more_texts($read_more_texts);
+				
+				$post->post_excerpt = thc_constants::EXCERPT_MARKER_PREFIX . $read_more_text_id;
 			}
 			else
 			{
-				$content = $event[1];
+				$content = $event[1];				
+				$post->post_excerpt = '';
 			}
 			
 			//$post->ID = -1;
@@ -29,7 +39,6 @@ class thc_helper
 			$post->post_date_gmt =  current_time('mysql', $gmt = 1);
 			$post->post_content = $content;
 			$post->post_title = $event[1];
-			$post->post_excerpt = '';
 			$post->post_status = 'publish';
 			$post->ping_status = 'closed';
 			$post->post_password = '';
@@ -169,6 +178,11 @@ class thc_helper
 	{
 		$d = DateTime::createFromFormat($format, $date);
 		return $d && $d->format($format) == $date;
+	}
+	
+	function get_read_more_text($event)
+	{
+		return 'Read more about <a href="' . $event[3] . '" target="_blank" title="Read more about ' . $event[1] . ' on TheHolidayCalendar.com">' . $event[1] . '</a> on <a href="http://www.theholidaycalendar.com/" title="The Holiday Calendar - All holidays in one place!" target="_blank">TheHolidayCalendar.com</a>.';
 	}
 }
 ?>

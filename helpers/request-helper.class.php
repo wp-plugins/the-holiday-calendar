@@ -2,7 +2,8 @@
 class request_helper {
 	const queryIsModifiedKey = 'thc_request_is_modified';
 	const queryWasModifiedKey = 'thc_request_was_modified';
-	const surpressTitleFilter = 'thc_surpress_title_filter';
+	const surpressTitleFilterKey = 'thc_surpress_title_filter';
+	const readMoreTextsKey = 'thc_read_more_texts';
 	
 	function get_query_is_modified()
 	{
@@ -36,17 +37,32 @@ class request_helper {
 	
 	function get_surpress_title_filter()
 	{
-		if(!array_key_exists(self::surpressTitleFilter, $_REQUEST))
+		if(!array_key_exists(self::surpressTitleFilterKey, $_REQUEST))
 		{
 			return false;
 		}
 		
-		return $_REQUEST[self::surpressTitleFilter];
+		return $_REQUEST[self::surpressTitleFilterKey];
 	}
 	
 	function set_surpress_title_filter($value)
 	{
-		$_REQUEST[self::surpressTitleFilter] = $value;
+		$_REQUEST[self::surpressTitleFilterKey] = $value;
+	}
+	
+	function get_read_more_texts()
+	{
+		if(!array_key_exists(self::readMoreTextsKey, $_REQUEST))
+		{
+			return array();
+		}
+		
+		return $_REQUEST[self::readMoreTextsKey];
+	}
+	
+	function set_read_more_texts($value)
+	{		
+		$_REQUEST[self::readMoreTextsKey] = $value;
 	}
 }
 ?>
