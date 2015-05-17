@@ -13,6 +13,7 @@ class thc_update_helper
 			//Default values
 			$date_format = 5; //US
 			$enable_readmore = 1;
+			$show_date_in_title = 1;
 			
 			try
 			{				
@@ -50,6 +51,7 @@ class thc_update_helper
 			//3. Save properties as settings
 			$settings[thc_settings_helper::DATE_FORMAT_KEY] = $date_format;
 			$settings[thc_settings_helper::HIDE_READMORE_KEY] = $enable_readmore ? 0 : 1;
+			$settings[thc_settings_helper::SHOW_DATE_IN_TITLE_KEY] = $show_date_in_title;
 			
 			update_option(thc_settings_helper::OPTION_NAME, $settings);
 		}

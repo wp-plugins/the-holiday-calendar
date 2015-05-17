@@ -69,7 +69,7 @@ class the_holiday_calendar extends WP_Widget {
 		if(!request_helper::get_query_was_modified())
 		{
 			return $excerpt;
-		}
+		}		
 		
 		global $post;
 		if(thc_string_helper::contains($post->post_excerpt, thc_constants::EXCERPT_MARKER_PREFIX))
@@ -185,7 +185,7 @@ class the_holiday_calendar extends WP_Widget {
 				{
 					$title = $title . ' (' . self::get_requested_date() . ')';		
 				}
-				else if ( is_single() && !request_helper::get_surpress_title_filter())
+				else if (thc_settings_helper::get_show_date_in_title() == 1 && is_single() && !request_helper::get_surpress_title_filter())
 				{
 					global $post;
 					

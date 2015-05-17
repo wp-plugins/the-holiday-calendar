@@ -92,7 +92,15 @@ class thc_settings {
             array( $this, 'read_more_render' ), 
             self::SETTINGS_PAGE_SLUG, 
             self::SETTINGS_SECTION_NAME
-        );      
+        );   
+		
+		add_settings_field(
+            thc_settings_helper::SHOW_DATE_IN_TITLE_KEY, 
+            'Show date on event page', 
+            array( $this, 'show_date_in_title_render' ), 
+            self::SETTINGS_PAGE_SLUG, 
+            self::SETTINGS_SECTION_NAME
+        );   
     }
 
     /**
@@ -108,6 +116,9 @@ class thc_settings {
 
         if( isset( $input[thc_settings_helper::HIDE_READMORE_KEY] ) )
             $new_input[thc_settings_helper::HIDE_READMORE_KEY] = sanitize_text_field( $input[thc_settings_helper::HIDE_READMORE_KEY] );
+			
+		if( isset( $input[thc_settings_helper::SHOW_DATE_IN_TITLE_KEY] ) )
+            $new_input[thc_settings_helper::SHOW_DATE_IN_TITLE_KEY] = sanitize_text_field( $input[thc_settings_helper::SHOW_DATE_IN_TITLE_KEY] );
 
         return $new_input;
     }
@@ -125,7 +136,7 @@ class thc_settings {
      */
     public function date_format_render()
     {	
-		$dateFormats = array('dd-mm-yy' => '0', 'dd.mm.yy' => '1', 'dd.mm.yyyy' => '2', 'dd/mm/yy' => '3', 'dd/mm/yyyy' => '4', 'mm/dd/yyyy' => '5', 'yy/mm/dd' => '6', 'yyyy년 m월 d일' => '7');
+		$dateFormats = array('dd-mm-yy' => '0', 'dd.mm.yy' => '1', 'dd.mm.yyyy' => '2', 'dd/mm/yy' => '3', 'dd/mm/yyyy' => '4', 'mm/dd/yyyy' => '5', 'yy/mm/dd' => '6', 'yyyy? m? d?' => '7');
 		
         ?>
 			<select name='thc_settings[<?php echo thc_settings_helper::DATE_FORMAT_KEY; ?>]'>
@@ -143,6 +154,13 @@ class thc_settings {
     {
         ?>
 			<input type='checkbox' name='thc_settings[<?php echo thc_settings_helper::HIDE_READMORE_KEY; ?>]' <?php checked( $this->options[thc_settings_helper::HIDE_READMORE_KEY], 1 ); ?> value='1'>
+		<?php
+    }
+	
+	public function show_date_in_title_render()
+    {
+        ?>
+			<input type='checkbox' name='thc_settings[<?php echo thc_settings_helper::SHOW_DATE_IN_TITLE_KEY; ?>]' <?php checked( $this->options[thc_settings_helper::SHOW_DATE_IN_TITLE_KEY], 1 ); ?> value='1'> Recommended! (However, some websites made some modifications and may want to disable this.)
 		<?php
     }
 }

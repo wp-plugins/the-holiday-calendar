@@ -20,7 +20,7 @@ class thc_helper
 				
 				$read_more_text_id = uniqid();
 				
-				$read_more_texts = array();				
+				$read_more_texts = request_helper::get_read_more_texts();				
 				$read_more_texts[$read_more_text_id] = $content;	
 
 				request_helper::set_read_more_texts($read_more_texts);
