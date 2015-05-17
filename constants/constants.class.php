@@ -1,7 +1,7 @@
 <?php
 class thc_constants
 {
-	const PLUGIN_VERSION = '1.10.2';
+	const PLUGIN_VERSION = '1.11';
 	const POSTTYPE = 'thc-events';
 	const EVENTS_SLUG = 'events';
 	const EXCERPT_MARKER_PREFIX = 'thcexcerpt';
