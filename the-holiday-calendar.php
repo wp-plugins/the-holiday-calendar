@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: The Holiday Calendar
-Version: 1.11.1
+Version: 1.11.2
 Plugin URI: http://www.theholidaycalendar.com
 Description: Shows the upcoming holidays.
 Author: Mva7
@@ -181,20 +181,20 @@ class the_holiday_calendar extends WP_Widget {
 			{
 				//$title = self::get_requested_date() . ' - ' . $title;
 			}
-			else {
-				if(is_archive() && in_the_loop())
+			else if ((is_archive() && in_the_loop()) || (thc_settings_helper::get_show_date_in_title() == 1 && is_single() && !request_helper::get_surpress_title_filter() && $id == get_the_ID()))
+			{
+				if($post->ID > 0)
 				{
-					$title = $title . ' (' . self::get_requested_date() . ')';		
-				}
-				else if (thc_settings_helper::get_show_date_in_title() == 1 && is_single() && !request_helper::get_surpress_title_filter() && $id == get_the_ID())
-				{
-					
 					$event_date = get_post_meta( $post->ID, 'eventDate', true );
 					$event_date = thc_helper::formatDate($event_date);
-					
-					$title .= ' (' . $event_date . ')';
 				}
-			}
+				else
+				{
+					$event_date = self::get_requested_date();
+				}
+				
+				$title .= ' (' . $event_date . ')';
+			}			
 		}
 		
 		return $title;
