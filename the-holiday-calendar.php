@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: The Holiday Calendar
-Version: 1.11.2
+Version: 1.12
 Plugin URI: http://www.theholidaycalendar.com
 Description: Shows the upcoming holidays.
 Author: Mva7
@@ -24,6 +24,7 @@ require_once('helpers/translation-helper.class.php');
 require_once('helpers/update-helper.class.php');
 require_once('helpers/string-helper.class.php');
 require_once('helpers/settings-helper.class.php');
+require_once('model/plugin-holiday.class.php');
 
 add_action( 'widgets_init', create_function('', 'return register_widget("the_holiday_calendar");'));
 add_action( 'init', array( 'the_holiday_calendar', 'create_post_type' ) );

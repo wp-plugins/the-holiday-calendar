@@ -2,7 +2,7 @@
 class thc_helper
 {
 	function get_remote_events_as_posts($countryIso, $widgetId = NULL, $date = NULL)
-	{
+	{	
 		$hide_readmore = thc_settings_helper::get_hide_readmore();
 		
 		global $wp_query, $wp;
@@ -14,9 +14,16 @@ class thc_helper
 		{
 			$post = new stdClass();			
 			
+			$teaser = $event[4];
+			
+			if(!empty($teaser))
+			{
+				$teaser = '<p>' . $teaser . '</p>';
+			}
+			
 			if($hide_readmore == 0)
 			{				
-				$content = self::get_read_more_text($event);
+				$content = $teaser . thc_translation_helper::get_read_more_text($event);
 				
 				$read_more_text_id = uniqid();
 				
@@ -29,7 +36,7 @@ class thc_helper
 			}
 			else
 			{
-				$content = $event[1];				
+				$content = !empty($teaser) ? $teaser : '<p>' . $event[1] . '</p>';				
 				$post->post_excerpt = '';
 			}
 			
@@ -76,10 +83,9 @@ class thc_helper
 
 	function add_remote_events($events, $countryIso, $widgetId = NULL, $date = NULL)
 	{
-		$rows = session_helper::get_remote_events();
+		$plugin_holidays = session_helper::get_remote_holidays();
 		
-		if($rows == null) {
-			
+		if($plugin_holidays == null) {
 			$url = 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=' . thc_constants::PLUGIN_VERSION . '&amountOfHolidays=1000&fromDate=2000-01-01&pluginId=' . (!is_null($widgetId) ? $widgetId : '00000000-0000-0000-0000-000000000000') . '&url=' . site_url() . '&countryIso=' . $countryIso . '&dateFormat=' . thc_settings_helper::get_date_format();				
 			$result = wp_remote_get($url, array('timeout' => 3));
 			
@@ -88,26 +94,34 @@ class thc_helper
 				return $events;
 			}
 			
-			$rows = explode("\r\n", $result['body']);		
+			$plugin_holidays = self::convert_json_to_plugin_holidays($result['body']);
 		
-			session_helper::set_remote_events($rows);
+			session_helper::set_remote_holidays($plugin_holidays);
 		}
 		
 		//echo var_dump($rows);
-		foreach($rows as $row)
+		foreach($plugin_holidays as $plugin_holiday)
 		{			
-			if(!empty($row))
+			if(is_null($date) || $date == $plugin_holiday->{'date'})
 			{
-				$splitted = explode('=', $row);
-				
-				if(is_null($date) || $date == $splitted[2])
-				{
-					$events[] = array($splitted[0], $splitted[1], $splitted[2], $splitted[3]);
-				}
+				$events[] = array($plugin_holiday->formattedDate, $plugin_holiday->title, $plugin_holiday->{'date'}, $plugin_holiday->url, $plugin_holiday->teaser);
 			}
 		}
 		
 		return $events;
+	}
+	
+	function convert_json_to_plugin_holidays($json_string)
+	{
+		$plugin_holidays = array();
+		$json_holidays = json_decode($json_string);			
+		
+		foreach($json_holidays as $json_holiday)
+		{
+			$plugin_holidays[] = thc_plugin_holiday::create_from_object( $json_holiday );
+		}
+		
+		return $plugin_holidays;
 	}
 	
 	function formatDate($dateToFormat)
@@ -124,7 +138,7 @@ class thc_helper
 			4: dd/mm/yyyy
 			5: mm/dd/yyyy (US)
 			6: yy/mm/dd
-			7: yyyy년 m월 d일
+			7: yyyy? m? d?
 		*/
 		
 		$dateFormat = thc_settings_helper::get_date_format();
@@ -146,7 +160,7 @@ class thc_helper
 			case 6:
 				return date_format($dateToFormat,"y/m/d");//return dateToFormat.ToString("yy/MM/dd", CultureInfo.InvariantCulture);
 			case 7:
-				return date_format($dateToFormat,"Y년 m월 d일");//return dateToFormat.ToString("yyyy년 m월 d일", CultureInfo.InvariantCulture);
+				return date_format($dateToFormat,"Y? m? d?");//return dateToFormat.ToString("yyyy? m? d?", CultureInfo.InvariantCulture);
 		}
 
 		throw new InvalidOperationException("Date format not supported");
@@ -178,11 +192,6 @@ class thc_helper
 	{
 		$d = DateTime::createFromFormat($format, $date);
 		return $d && $d->format($format) == $date;
-	}
-	
-	function get_read_more_text($event)
-	{
-		return 'Read more about <a href="' . $event[3] . '" target="_blank" title="Read more about ' . $event[1] . ' on TheHolidayCalendar.com">' . $event[1] . '</a> on <a href="http://www.theholidaycalendar.com/" title="The Holiday Calendar - All holidays in one place!" target="_blank">TheHolidayCalendar.com</a>.';
 	}
 }
 ?>
