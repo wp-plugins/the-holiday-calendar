@@ -3,7 +3,7 @@ Contributors: mva7
 Tags: calendar, calendar localization, calendar widget, calendario, calendars, Calender, event, event calendar, event list, event manager, event page, event widget, events, events calendar, free calendar, holiday, holidays, holiday calendar, upcoming holidays, Kalender, online calendar, Organizer, upcoming events, upcoming events widget
 Requires at least: 3.3
 Tested up to: 4.2.2
-Stable tag: 1.11.2
+Stable tag: 1.11.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,14 +48,12 @@ In the near future we plan to support other countries also.
 
 == Screenshots ==
 
- 
 1. The plugin in action
 2. Calendar view is also supported
 
 == Changelog ==
-= 1.12 =
-* Information about the holiday is now displayed. (Initially only for UK and US holidays but other countries will follow)
-* Translated read more link in French, German, Portuguese, Russian and Spanish.
+= 1.11.3 =
+* Security fix to prevent cross site scripting
 
 = 1.11.2 =
 * When the date was not present in the url, in some cases the date in the event titles were wrong.
