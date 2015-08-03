@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: The Holiday Calendar
-Version: 1.11.2
+Version: 1.11.3
 Plugin URI: http://www.theholidaycalendar.com
 Description: Shows the upcoming holidays.
 Author: Mva7
