@@ -76,7 +76,7 @@ class thc_calendar {
 					
 					if(isset($wp_query->query_vars['thc-month']))
 					{
-						$url = add_query_arg(array('thc-month' => $wp_query->query_vars['thc-month']), $url);
+						$url = add_query_arg(array('thc-month' => htmlspecialchars($wp_query->query_vars['thc-month'])), $url);
 					}
 					
 					$columnContent = '<a class="thc-highlight" title="' . $caption . '" href="' . $url . '">' . $list_day . '</a>';
