@@ -56,8 +56,7 @@ class thc_widget {
 				while ( $query->have_posts() ) {
 					$query->the_post();
 					
-					$eventDate = get_post_meta( $query->post->ID, 'eventDate', true );								
-					$formattedDate = thc_helper::formatDate($eventDate);
+					$eventDate = get_post_meta( $query->post->ID, 'eventDate', true );
 					
 					request_helper::set_surpress_title_filter(true);					
 					$title = get_the_title();
@@ -70,10 +69,24 @@ class thc_widget {
 						$url = get_permalink();
 					}
 					
-					$events[] = array($formattedDate, $title, $eventDate, '');
+					$eventDateEnd = get_post_meta( $query->post->ID, 'eventDateEnd', true);
 					
-					echo $separator . '[\'' . $formattedDate . '\',\'' . $title . '\',\'' . $eventDate . '\',\'' . $url . '\',\'1\']';
-					$separator = ',';
+					if(empty($eventDateEnd))
+					{
+						$eventDateEnd = $eventDate; //use $eventDate as default for backwards compatibility
+					}
+
+					$days_difference = thc_helper::get_difference_in_days($eventDate, $eventDateEnd);
+
+					for($i = 0; $i <= $days_difference; $i++)
+					{
+						$currentEventDate = date('y-m-d', (strtotime($eventDate) + ($i*60*60*24)));
+						$formattedDate = thc_helper::formatDate($currentEventDate);
+						$events[] = array($formattedDate, $title, $currentEventDate, '');
+					
+						echo $separator . '[\'' . $formattedDate . '\',\'' . $title . '\',\'' . $currentEventDate . '\',\'' . $url . '\',\'1\']';
+						$separator = ',';
+					}
 				}
 			} else {
 				echo '/* no posts found */';

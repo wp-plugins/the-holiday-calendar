@@ -52,15 +52,6 @@ In the near future we plan to support other countries also.
 2. Calendar view is also supported
 
 == Changelog ==
-= 1.11.3 =
-* Security fix to prevent cross site scripting
-
-= 1.11.2 =
-* When the date was not present in the url, in some cases the date in the event titles were wrong.
-
-= 1.11.1 =
-* Some sites showed something like thcexcerpt555911463397c as event excerpt. Fixed now.
-
 = 1.11 =
 * Added settings screen
 * Current widget properties are automatically migrated to settings

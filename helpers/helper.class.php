@@ -138,7 +138,7 @@ class thc_helper
 			4: dd/mm/yyyy
 			5: mm/dd/yyyy (US)
 			6: yy/mm/dd
-			7: yyyy? m? d?
+			7: yyyy년 m월 d일
 		*/
 		
 		$dateFormat = thc_settings_helper::get_date_format();
@@ -160,7 +160,7 @@ class thc_helper
 			case 6:
 				return date_format($dateToFormat,"y/m/d");//return dateToFormat.ToString("yy/MM/dd", CultureInfo.InvariantCulture);
 			case 7:
-				return date_format($dateToFormat,"Y? m? d?");//return dateToFormat.ToString("yyyy? m? d?", CultureInfo.InvariantCulture);
+				return date_format($dateToFormat,"Y년 m월 d일");//return dateToFormat.ToString("yyyy년 m월 d일", CultureInfo.InvariantCulture);
 		}
 
 		throw new InvalidOperationException("Date format not supported");
@@ -188,10 +188,15 @@ class thc_helper
 		);
 	}
 	
-	function validateDate($date, $format)
-	{
-		$d = DateTime::createFromFormat($format, $date);
-		return $d && $d->format($format) == $date;
+	function validate_us_date($test_date) {
+		$date_regex = '/^(0[1-9]|1[0-2])\/(0[1-9]|1\d|2\d|3[01])\/(19|20)\d{2}$/';
+		return preg_match($date_regex, $test_date);
 	}
+	
+	function get_difference_in_days($date1, $date2) {
+		$datediff = strtotime($date2) - strtotime($date1);
+		
+		return floor($datediff/(60*60*24));
+	 }
 }
 ?>
