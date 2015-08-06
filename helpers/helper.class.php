@@ -81,12 +81,13 @@ class thc_helper
 		return $posts;
 	}
 
-	function add_remote_events($events, $countryIso, $widgetId = NULL, $date = NULL)
-	{
+	function add_remote_events($events, $countryIso, $widgetId = NULL, $date = NULL, $fromDate = '2000-01-01')
+	{	
 		$plugin_holidays = session_helper::get_remote_holidays();
 		
 		if($plugin_holidays == null) {
-			$url = 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=' . thc_constants::PLUGIN_VERSION . '&amountOfHolidays=1000&fromDate=2000-01-01&pluginId=' . (!is_null($widgetId) ? $widgetId : '00000000-0000-0000-0000-000000000000') . '&url=' . site_url() . '&countryIso=' . $countryIso . '&dateFormat=' . thc_settings_helper::get_date_format();				
+			$url = 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=' . thc_constants::PLUGIN_VERSION . '&amountOfHolidays=1000&fromDate=' . $fromDate . '&pluginId=' . (!is_null($widgetId) ? $widgetId : '00000000-0000-0000-0000-000000000000') . '&url=' . site_url() . '&countryIso=' . $countryIso . '&dateFormat=' . thc_settings_helper::get_date_format();				
+			
 			$result = wp_remote_get($url, array('timeout' => 3));
 			
 			if(is_wp_error( $result ))
@@ -197,6 +198,11 @@ class thc_helper
 		$datediff = strtotime($date2) - strtotime($date1);
 		
 		return floor($datediff/(60*60*24));
-	 }
+	}
+	 
+	function is_external_post()
+	{
+		return get_the_ID() == 0;
+	}
 }
 ?>
