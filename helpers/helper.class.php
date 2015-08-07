@@ -105,7 +105,16 @@ class thc_helper
 		{			
 			if(is_null($date) || $date == $plugin_holiday->{'date'})
 			{
-				$events[] = array($plugin_holiday->formattedDate, $plugin_holiday->title, $plugin_holiday->{'date'}, $plugin_holiday->url, $plugin_holiday->teaser);
+				$event = new thc_event();
+						
+				$event->formattedDate = $plugin_holiday->formattedDate;
+				$event->title = $plugin_holiday->title;
+				$event->eventDate = $plugin_holiday->{'date'};
+				$event->url = $plugin_holiday->url;
+				$event->isExternal = true;
+				$event->teaser = $plugin_holiday->teaser;
+				
+				$events[] = $event;
 			}
 		}
 		
@@ -198,11 +207,6 @@ class thc_helper
 		$datediff = strtotime($date2) - strtotime($date1);
 		
 		return floor($datediff/(60*60*24));
-	}
-	 
-	function is_external_post()
-	{
-		return get_the_ID() == 0;
 	}
 }
 ?>

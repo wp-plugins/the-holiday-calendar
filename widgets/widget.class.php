@@ -53,16 +53,10 @@ class thc_widget {
 					
 					$eventDate = get_post_meta( $query->post->ID, 'eventDate', true );
 					
-					request_helper::set_surpress_title_filter(true);					
-					$title = get_the_title();
-					request_helper::set_surpress_title_filter(false);
+					request_helper::set_surpress_title_filter(true);
+					request_helper::set_surpress_title_filter(false);		
 					
-					$url = '';
-					
-					if(!thc_helper::is_external_post())
-					{
-						$url = get_permalink();
-					}
+					$url = get_permalink();					
 					
 					$eventDateEnd = get_post_meta( $query->post->ID, 'eventDateEnd', true);
 					
@@ -74,9 +68,16 @@ class thc_widget {
 					$days_difference = thc_helper::get_difference_in_days($eventDate, $eventDateEnd);
 
 					for($i = 0; $i <= $days_difference; $i++)
-					{
-						$formattedDate = thc_helper::formatDate($eventDate);
-						$events[] = array($formattedDate, $title, $eventDate, $url);						
+					{						
+						$event = new thc_event();
+						
+						$event->formattedDate = thc_helper::formatDate($eventDate);
+						$event->title = get_the_title();
+						$event->eventDate = $eventDate;
+						$event->url = $url;
+						$event->isExternal = false;
+						
+						$events[] = $event;						
 					}
 				}
 			} else {
@@ -100,10 +101,14 @@ class thc_widget {
 				
 				foreach($events as $event)
 				{
-					echo '<div class="thc-holiday" style="display: table-row;">';
-					$eventTitle = $events[2] != '' ? '<a href="' . $event[3] . '" title="' . $event[1] . '"' . (!thc_helper::is_external_post() ? 'class="customEvent"' : '') . '>' . $event[1] . '</a>' : $event[1];
+					$url = get_post_type_archive_link(thc_constants::POSTTYPE);
+					$url = add_query_arg(array('date' => 'replaceDate'), $url);
+					$url = add_query_arg(array('country' => $countryIso), $url);
 					
-					echo '<div class="date" style="display: table-cell; padding-right: 10px;">' . $event[0] . '</div><div class="name" style="display: table-cell; padding-bottom: 10px;">' . $eventTitle . '</div>';
+					echo '<div class="thc-holiday" style="display: table-row;">';
+					$eventTitle = '<a href="' . $url . '" title="' . $event->title . '"' . (!$event->isExternal ? 'class="customEvent"' : '') . '>' . $event->title . '</a>';
+					
+					echo '<div class="date" style="display: table-cell; padding-right: 10px;">' . $event->formattedDate . '</div><div class="name" style="display: table-cell; padding-bottom: 10px;">' . $eventTitle . '</div>';
 					
 					echo '</div>';
 				}
@@ -124,10 +129,12 @@ class thc_widget {
 		if('1' == $instance['show_powered_by'] ) {
 			echo '<div class="thc-widget-footer" style="clear: left;"><span class="thc-powered-by" style="clear: left;">Powered by&nbsp;</span><a href="http://www.theholidaycalendar.com/" title="The Holiday Calendar - All holidays in one overview" target="_blank">The Holiday Calendar</a></div>';
 		}
+		
+		echo $after_widget;
 	}
 	
 	function sortByDate($a, $b) {
-		return strcasecmp($a[2], $b[2]);
+		return strcasecmp($a->eventDate, $b->eventDate);
 	}
 }
 ?>
