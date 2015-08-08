@@ -107,7 +107,7 @@ class thc_translation_helper {
 						break;
 		}
 		
-		$holiday_url = '<a href="' . $event[3] . '" target="_blank" title="Read more about ' . $event[1] . ' on TheHolidayCalendar.com">' . $event[1] . '</a>';
+		$holiday_url = '<a href="' . $event->url . '" target="_blank" title="Read more about ' . $event->title . ' on TheHolidayCalendar.com">' . $event->title . '</a>';
 		$website_url = '<a href="http://www.theholidaycalendar.com/" title="The Holiday Calendar - All holidays in one place!" target="_blank">TheHolidayCalendar.com</a>';
 		
 		return sprintf('<p>' . $read_more_string . '</p>', $holiday_url, $website_url);

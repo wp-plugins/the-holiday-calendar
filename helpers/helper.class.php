@@ -1,6 +1,10 @@
 <?php
 class thc_helper
 {
+	const remote_holidays_key = 'thc_remote_holidays_key_';
+	const remote_holidays_last_attempt_key = 'remote_holidays_last_attempt_key_';	
+	const remote_holidays_previous_plugin_version_key = 'remote_holidays_previous_plugin_version_key';
+	
 	function get_remote_events_as_posts($countryIso, $widgetId = NULL, $date = NULL)
 	{	
 		$hide_readmore = thc_settings_helper::get_hide_readmore();
@@ -12,18 +16,16 @@ class thc_helper
 		
 		foreach($events as $event)
 		{
-			$post = new stdClass();			
+			$post = new stdClass();
 			
-			$teaser = $event[4];
-			
-			if(!empty($teaser))
+			if(!empty($event->teaser))
 			{
-				$teaser = '<p>' . $teaser . '</p>';
+				$teaser = '<p>' . $event->teaser . '</p>';
 			}
 			
 			if($hide_readmore == 0)
 			{				
-				$content = $teaser . thc_translation_helper::get_read_more_text($event);
+				$content = $event->teaser . thc_translation_helper::get_read_more_text($event);
 				
 				$read_more_text_id = uniqid();
 				
@@ -36,7 +38,7 @@ class thc_helper
 			}
 			else
 			{
-				$content = !empty($teaser) ? $teaser : '<p>' . $event[1] . '</p>';				
+				$content = !empty($event->teaser) ? $event->teaser : '<p>' . $event->title . '</p>';				
 				$post->post_excerpt = '';
 			}
 			
@@ -45,7 +47,7 @@ class thc_helper
 			$post->post_date = current_time('mysql');
 			$post->post_date_gmt =  current_time('mysql', $gmt = 1);
 			$post->post_content = $content;
-			$post->post_title = $event[1];
+			$post->post_title = $event->title;
 			$post->post_status = 'publish';
 			$post->ping_status = 'closed';
 			$post->post_password = '';
@@ -80,12 +82,20 @@ class thc_helper
 		
 		return $posts;
 	}
-
+	
 	function add_remote_events($events, $countryIso, $widgetId = NULL, $date = NULL, $fromDate = '2000-01-01')
-	{	
-		$plugin_holidays = session_helper::get_remote_holidays();
+	{		
+		$now = date('U');
+		$last_attempt = get_option( remote_holidays_last_attempt_key . $countryIso );
+		$previous_version =	get_option( remote_holidays_previous_plugin_version_key );
 		
-		if($plugin_holidays == null) {
+		if($previous_version == thc_constants::PLUGIN_VERSION && $last_attempt >= ($now - thc_constants::DAY_IN_SECONDS))
+		{
+			$plugin_holidays = get_option( remote_holidays_key . $countryIso );
+		}
+		
+		if ($plugin_holidays == null) {
+			echo 'cache was empty';
 			$url = 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=' . thc_constants::PLUGIN_VERSION . '&amountOfHolidays=1000&fromDate=' . $fromDate . '&pluginId=' . (!is_null($widgetId) ? $widgetId : '00000000-0000-0000-0000-000000000000') . '&url=' . site_url() . '&countryIso=' . $countryIso . '&dateFormat=' . thc_settings_helper::get_date_format();				
 			
 			$result = wp_remote_get($url, array('timeout' => 3));
@@ -95,9 +105,11 @@ class thc_helper
 				return $events;
 			}
 			
-			$plugin_holidays = self::convert_json_to_plugin_holidays($result['body']);
-		
-			session_helper::set_remote_holidays($plugin_holidays);
+			$plugin_holidays = self::convert_json_to_plugin_holidays($result['body']);		
+			
+			update_option( remote_holidays_key . $countryIso, $plugin_holidays );
+			update_option( remote_holidays_last_attempt_key . $countryIso, $now );			
+			update_option( remote_holidays_previous_plugin_version_key, thc_constants::PLUGIN_VERSION );
 		}
 		
 		//echo var_dump($rows);

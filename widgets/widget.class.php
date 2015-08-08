@@ -102,7 +102,7 @@ class thc_widget {
 				foreach($events as $event)
 				{
 					$url = get_post_type_archive_link(thc_constants::POSTTYPE);
-					$url = add_query_arg(array('date' => 'replaceDate'), $url);
+					$url = add_query_arg(array('date' => $event->eventDate), $url);
 					$url = add_query_arg(array('country' => $countryIso), $url);
 					
 					echo '<div class="thc-holiday" style="display: table-row;">';
