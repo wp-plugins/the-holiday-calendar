@@ -62,8 +62,8 @@ class thc_calendar {
 					$separator = $numberOfEvents > 1 ? '- ' : '';
 					foreach($foundEvents as $foundEvent)
 					{
-						$caption.= $separator . addslashes($events[$foundEvent][1]);
-						$separator = '\r\n' . $separator;
+						$caption.= $separator . addslashes($events[$foundEvent]->title);
+						$separator = PHP_EOL . $separator;
 					}
 					
 					$url = get_post_type_archive_link(thc_constants::POSTTYPE);
@@ -156,7 +156,7 @@ class thc_calendar {
 	function searchForEvents($date, $array) {
 	   $events = array();
 	   foreach ($array as $key => $val) {
-		   if ($val[2] == $date) {
+		   if ($val->eventDate == $date) {
 			   $events[] = $key;
 		   }
 	   }

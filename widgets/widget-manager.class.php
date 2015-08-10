@@ -27,6 +27,7 @@ class thc_widget_manager {
 		$instance['numberOfHolidays'] = $new_instance['numberOfHolidays'];
 		
 		session_helper::clear_session();
+		thc_cache_helper::clear_cache($instance['country2']);
 		
 		return $instance;
 	}

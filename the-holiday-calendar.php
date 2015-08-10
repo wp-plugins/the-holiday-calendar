@@ -26,6 +26,7 @@ require_once('helpers/string-helper.class.php');
 require_once('helpers/settings-helper.class.php');
 require_once('model/plugin-holiday.class.php');
 require_once('model/event.class.php');
+require_once('helpers/cache-helper.class.php');
 
 add_action( 'widgets_init', create_function('', 'return register_widget("the_holiday_calendar");'));
 add_action( 'init', array( 'the_holiday_calendar', 'create_post_type' ) );

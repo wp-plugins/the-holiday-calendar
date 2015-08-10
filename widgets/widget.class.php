@@ -69,20 +69,21 @@ class thc_widget {
 
 					for($i = 0; $i <= $days_difference; $i++)
 					{						
+						$currentEventDate = date('Y-m-d', strtotime($eventDate. ' + ' . $i . ' days'));
+					
 						$event = new thc_event();
 						
-						$event->formattedDate = thc_helper::formatDate($eventDate);
+						$event->formattedDate = thc_helper::formatDate($currentEventDate);
 						$event->title = get_the_title();
-						$event->eventDate = $eventDate;
+						$event->eventDate = $currentEventDate;
 						$event->url = $url;
 						$event->isExternal = false;
 						
 						$events[] = $event;						
 					}
 				}
-			} else {
-				echo '/* no posts found */';
 			}
+			
 			/* Restore original Post Data */
 			wp_reset_postdata();
 			

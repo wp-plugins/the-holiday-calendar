@@ -56,18 +56,23 @@
 				</table>
 				
 				<script>
-						jQuery(document).ready(function(){
-							if(jQuery.fn.datepicker)
-							{
-								jQuery('#EventDate').datepicker({
-									dateFormat : 'mm/dd/yy'							
-								});
-								
-								jQuery('#EventDateEnd').datepicker({
-									dateFormat : 'mm/dd/yy'							
-								});
-							}
-						});
+					jQuery(document).ready(function() {
+						if (jQuery.fn.datepicker) {
+							jQuery('#EventDate').datepicker({
+								dateFormat: 'mm/dd/yy',
+								onSelect: function(dateText) {
+									if(jQuery('#EventDateEnd').val() == '')
+									{
+										jQuery('#EventDateEnd').val(dateText);
+									}
+								}
+							});
+
+							jQuery('#EventDateEnd').datepicker({
+								dateFormat: 'mm/dd/yy'
+							});
+						}
+					});
 				</script>
 			<?php
 		}

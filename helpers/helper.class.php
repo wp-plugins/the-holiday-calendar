@@ -1,10 +1,6 @@
 <?php
 class thc_helper
-{
-	const remote_holidays_key = 'thc_remote_holidays_key_';
-	const remote_holidays_last_attempt_key = 'remote_holidays_last_attempt_key_';	
-	const remote_holidays_previous_plugin_version_key = 'remote_holidays_previous_plugin_version_key';
-	
+{	
 	function get_remote_events_as_posts($countryIso, $widgetId = NULL, $date = NULL)
 	{	
 		$hide_readmore = thc_settings_helper::get_hide_readmore();
@@ -86,12 +82,12 @@ class thc_helper
 	function add_remote_events($events, $countryIso, $widgetId = NULL, $date = NULL, $fromDate = '2000-01-01')
 	{		
 		$now = date('U');
-		$last_attempt = get_option( remote_holidays_last_attempt_key . $countryIso );
-		$previous_version =	get_option( remote_holidays_previous_plugin_version_key );
+		$last_attempt = thc_cache_helper::get_remote_holidays_last_attempt($countryIso);
+		$previous_version =	thc_cache_helper::get_remote_holidays_previous_plugin_version();
 		
-		if($previous_version == thc_constants::PLUGIN_VERSION && $last_attempt >= ($now - thc_constants::DAY_IN_SECONDS))
+		if(isset($previous_version) && $previous_version == thc_constants::PLUGIN_VERSION && $last_attempt >= ($now - thc_constants::DAY_IN_SECONDS))
 		{
-			$plugin_holidays = get_option( remote_holidays_key . $countryIso );
+			$plugin_holidays = thc_cache_helper::get_remote_holidays($countryIso);
 		}
 		
 		if ($plugin_holidays == null) {
@@ -107,9 +103,9 @@ class thc_helper
 			
 			$plugin_holidays = self::convert_json_to_plugin_holidays($result['body']);		
 			
-			update_option( remote_holidays_key . $countryIso, $plugin_holidays );
-			update_option( remote_holidays_last_attempt_key . $countryIso, $now );			
-			update_option( remote_holidays_previous_plugin_version_key, thc_constants::PLUGIN_VERSION );
+			thc_cache_helper::set_remote_holidays($plugin_holidays, $countryIso);
+			thc_cache_helper::set_remote_holidays_last_attempt($now, $countryIso);
+			thc_cache_helper::set_remote_holidays_previous_plugin_version();			
 		}
 		
 		//echo var_dump($rows);
