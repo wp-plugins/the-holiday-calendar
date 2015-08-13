@@ -91,10 +91,9 @@ class thc_helper
 		}
 		
 		if ($plugin_holidays == null) {
-			echo 'cache was empty';
 			$url = 'http://www.theholidaycalendar.com/handlers/pluginData.ashx?pluginVersion=' . thc_constants::PLUGIN_VERSION . '&amountOfHolidays=1000&fromDate=' . $fromDate . '&pluginId=' . (!is_null($widgetId) ? $widgetId : '00000000-0000-0000-0000-000000000000') . '&url=' . site_url() . '&countryIso=' . $countryIso . '&dateFormat=' . thc_settings_helper::get_date_format();				
 			
-			$result = wp_remote_get($url, array('timeout' => 3));
+			$result = wp_remote_get($url, array('timeout' => 30));
 			
 			if(is_wp_error( $result ))
 			{
